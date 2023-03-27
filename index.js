@@ -1,16 +1,22 @@
-const bodyParser = require("body-parser")
+const express = require("express");
+const bodyParser = require("body-parser");
 const amigosPerdidosRouter = require("./routes/amigos");
+const s3Router = require("./routes/s3");
 
 const PORT = 3000;
 const HOST_NAME = "localhost";
 
 const app = express();
 app.use(express.static("client"));
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/amigos", weatherRouter);
+app.get("/healthcheck", (req, res) => {
+  return res.status(200).send();
+});
 
+app.use("/amigos", amigosPerdidosRouter);
+app.use("/s3", s3Router);
 
-app.listen(PORT, HOST_NAME, ()=> {
-    console.log(`Server running at ${HOST_NAME}:${PORT}`)
-})
+app.listen(PORT, HOST_NAME, () => {
+  console.log(`Server running at ${HOST_NAME}:${PORT}`);
+});
