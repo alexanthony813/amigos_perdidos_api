@@ -1,10 +1,11 @@
-const express = require("express");
+import express from "express";
+import { dbClient } from "../index.js";
 
 const amigosRoute = express.Router();
 
 class Amigo {
   constructor({
-    id,
+    id = null,
     species,
     last_seen_address,
     name,
@@ -143,6 +144,7 @@ const inMemoryAmigos = {
 };
 
 amigosRoute.get(`/`, (req, res) => {
+  console.dir(dbClient);
   if (inMemoryAmigos) {
     res.json(inMemoryAmigos).send();
   } else {
@@ -150,12 +152,14 @@ amigosRoute.get(`/`, (req, res) => {
   }
 });
 
-amigosRoute.post("/", (req, res) => {
+amigosRoute.post("/", async (req, res) => {
   try {
-    const newAmigo = new Amigo(req.body);
+    const newAmigoJson = await req.body;
+    const newAmigo = new Amigo(newAmigoJson);
     const ids = Object.keys(inMemoryAmigos);
     const lastId = ids.sort()[ids.length - 1];
-    const id = lastId + 1;
+    const id = (Number(lastId) + 1).toString();
+    newAmigo.id = id;
     inMemoryAmigos[id] = newAmigo;
     res.json(newAmigo).status(200).send();
   } catch (err) {
@@ -163,4 +167,4 @@ amigosRoute.post("/", (req, res) => {
   }
 });
 
-module.exports = amigosRoute;
+export default amigosRoute;

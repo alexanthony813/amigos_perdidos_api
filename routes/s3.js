@@ -1,9 +1,7 @@
-const dotenv = require("dotenv");
-const aws = require("aws-sdk");
-// TODO import { S3Client, AbortMultipartUploadCommand } from "@aws-sdk/client-s3";
-// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/index.html
-const express = require("express");
-const crypto = require("crypto");
+import dotenv from "dotenv";
+import aws from "aws-sdk";
+import express from "express";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -19,17 +17,18 @@ const s3 = new aws.S3({
   bucketName,
   accessKeyId,
   secretAccessKey,
-  signatureVersion: 'v4'
+  signatureVersion: "v4",
 });
 
 // Expires value is very high but who knows if someone on bad network uploading a picture...TODO revisit and decrease? not a huge security concern
 async function generatePresignedUrl() {
-  const rawBytes = await crypto.randomBytes(16)
-  const imageName = rawBytes.toString('hex');
+  const rawBytes = await crypto.randomBytes(16);
+  const imageName = `${rawBytes.toString("hex")}.jpg`;
   const params = {
     Bucket: bucketName,
     Key: imageName,
     Expires: 600,
+    ContentType,
   };
 
   const presignedUrl = await s3.getSignedUrlPromise("putObject", params);
@@ -41,4 +40,4 @@ s3Route.get("/", async (req, res) => {
   res.send({ url });
 });
 
-module.exports = s3Route;
+export default s3Route;
