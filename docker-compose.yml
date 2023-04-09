@@ -11,9 +11,8 @@ services:
       MONGO_DB_URL: mongodb://db/amigos_api
     volumes:
       - amigos_api:/data/db
-    # command:
-      # - npm start
-      # ./wait_for_db db:27017 && migrate-mongo up && 
+    command:
+      - pm start
   db:
     image: mongo:4.0.28-xenial
     ports:
