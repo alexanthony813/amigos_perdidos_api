@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  api:
+    image: amigos_api
+    build: ./
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      MONGO_DB_URL: mongodb://db/amigos_api
+    volumes:
+      - amigos_api:/data/db
+    command:
+      - pm start
+  db:
+    image: mongo:4.0.28-xenial
+    ports:
+      - "27017:27017"
+    environment:
+      - DB_URL=mongodb://db/amigos_api
+    volumes:
+      - amigos_api:/data/db
+volumes:
+  amigos_api:
