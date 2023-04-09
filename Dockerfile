@@ -1,20 +1,14 @@
 FROM node:18.15.0-alpine3.17 as builder
 
-WORKDIR /usr/app
+WORKDIR /app
 COPY package*.json ./
+COPY yarn.lock ./
+RUN npm install -g migrate-mongo --force
 RUN npm install
+# RUN npm run build
+
 COPY . .
-RUN npm run build
 
-FROM node
-WORKDIR /usr/app
-COPY package*.json ./
-RUN npm install --production
-
-COPY --from=builder /usr/app/dist ./dist
-
-COPY .env .
-
-EXPOSE 4000
+EXPOSE 3000
 
 CMD ["npm", "start"]

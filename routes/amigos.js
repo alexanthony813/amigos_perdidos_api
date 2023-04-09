@@ -1,5 +1,4 @@
 import express from "express";
-import { dbClient } from "../index.js";
 
 const amigosRoute = express.Router();
 
@@ -144,7 +143,6 @@ const inMemoryAmigos = {
 };
 
 amigosRoute.get(`/`, (req, res) => {
-  console.dir(dbClient);
   if (inMemoryAmigos) {
     res.json(inMemoryAmigos).send();
   } else {

@@ -1,21 +1,26 @@
 version: "3.8"
 services:
   api:
-    image: 
+    image: amigos_api
     build: ./
     ports:
-      - '4000:4000'
+      - "3000:3000"
     depends_on:
       - db
     environment:
-      DB_URL: mongodb://db/amigos
-  db:
-    image: postgres
-    environment:
-      PGPASSWORD: password
-      POSTGRES_USER: postgres
-      POSTGRES: amigos
-    ports:
-      - '5432:5432'
+      MONGO_DB_URL: mongodb://db/amigos_api
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - amigos_api:/data/db
+    # command:
+      # - npm start
+      # ./wait_for_db db:27017 && migrate-mongo up && 
+  db:
+    image: mongo:4.0.28-xenial
+    ports:
+      - "27017:27017"
+    environment:
+      - DB_URL=mongodb://db/amigos_api
+    volumes:
+      - amigos_api:/data/db
+volumes:
+  amigos_api:
