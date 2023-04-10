@@ -11,14 +11,18 @@ export let dbClient;
 
 const connectDb = async () => {
   try {
-    dbClient = await mongoose.connect(process.env.MONGO_DB_URL);
+    // TODO update to use local mongo when wait script fixed
+    // "mongodb://localhost:27017";
+    const mongoUrl = process.env.MONGO_DB_URL; // easier for dev purposes for now, was working before docker
+    dbClient = await mongoose.connect(mongoUrl, { dbName: "amigos" });
+    console.log("DATABASE CONNECTED, APP STARTING");
     return dbClient;
   } catch (error) {
     console.log(error);
   }
 };
 
-connectDb();
+await connectDb();
 
 const app = express();
 

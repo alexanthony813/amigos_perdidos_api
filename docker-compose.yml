@@ -12,7 +12,7 @@ services:
     volumes:
       - amigos_api:/data/db
     command:
-      - pm start
+      - npm start
   db:
     image: mongo:4.0.28-xenial
     ports:

@@ -1,5 +1,6 @@
+import mongoose from "mongoose";
+
 const amigoSchema = new mongoose.Schema({
-  id: Number,
   species: String,
   last_seen_address: String,
   name: String,
@@ -11,3 +12,5 @@ const amigoSchema = new mongoose.Schema({
   stray: Boolean,
   outdoor_amigo: Boolean,
 });
+
+export const Amigo = mongoose.model("Amigo", amigoSchema);
