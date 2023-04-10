@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import aws from "aws-sdk";
 import express from "express";
-import crypto from "crypto";
 
 dotenv.config();
 
