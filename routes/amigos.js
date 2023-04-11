@@ -13,6 +13,23 @@ amigosRoute.get("/", async (req, res) => {
   }
 });
 
+amigosRoute.get("/:amigoId", async (req, res) => {
+  const amigoId = req.params.amigoId;
+  if (!amigoId) {
+    return res.status(400).send();
+  }
+  try {
+    const amigo = await Amigo.findOne({ _id: amigoId });
+    if (!amigo) {
+      return res.status(404).send();
+    } else {
+      return res.json(amigo);
+    }
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
 amigosRoute.post("/", async (req, res) => {
   try {
     const newAmigoJson = await req.body;
