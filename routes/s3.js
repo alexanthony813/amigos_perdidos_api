@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import aws from "aws-sdk";
 import express from "express";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -27,7 +28,6 @@ async function generatePresignedUrl() {
     Bucket: bucketName,
     Key: imageName,
     Expires: 600,
-    ContentType,
   };
 
   const presignedUrl = await s3.getSignedUrlPromise("putObject", params);

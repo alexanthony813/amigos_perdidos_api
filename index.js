@@ -39,7 +39,7 @@ app.get("/", (req, res) => {
   return res.status(200).send();
 });
 
-app.use("/amigos", amigosRouter);
+app.use("/", amigosRouter);
 app.use("/s3", s3Router);
 
 // app.listen(())

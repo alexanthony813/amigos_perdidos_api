@@ -4,17 +4,17 @@ import { Amigo } from "../models/index.js";
 
 const amigosRoute = express.Router();
 
-amigosRoute.get("/", async (req, res) => {
+amigosRoute.get("/amigos", async (req, res) => {
   try {
     const amigos = await Amigo.find();
-    res.json(amigos);
+    res.json(amigos.reverse());
   } catch (err) {
     return res.status(500).json(err);
   }
 });
 
-amigosRoute.get("/:amigoId", async (req, res) => {
-  const amigoId = req.params.amigoId;
+amigosRoute.get("/amigos/:amigoId", async (req, res) => {
+  const { amigoId } = req.params;
   if (!amigoId) {
     return res.status(400).send();
   }
@@ -30,7 +30,24 @@ amigosRoute.get("/:amigoId", async (req, res) => {
   }
 });
 
-amigosRoute.post("/", async (req, res) => {
+amigosRoute.get("/users/:userId/amigos", async (req, res) => {
+  const { userId } = req.params;
+  if (!userId) {
+    return res.status(400).send();
+  }
+  try {
+    const amigo = await Amigo.find({ owner_id: userId });
+    if (!amigo) {
+      return res.status(404).send();
+    } else {
+      return res.json(amigo);
+    }
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
+amigosRoute.post("/amigos", async (req, res) => {
   try {
     const newAmigoJson = await req.body;
     const { species } = newAmigoJson;
