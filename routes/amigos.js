@@ -1,6 +1,9 @@
-import express from "express";
+import express, { query } from "express";
+import joi from "joi";
+import jwt from "jsonwebtoken";
 import { dbClient } from "../index.js";
-import { Amigo } from "../models/index.js";
+import { Amigo, User } from "../models/index.js";
+import validateWith from "../middleware/validation.js";
 
 const amigosRoute = express.Router();
 
@@ -59,10 +62,60 @@ amigosRoute.post("/amigos", async (req, res) => {
     }
     const newAmigo = new Amigo(newAmigoJson);
     newAmigo.save();
-    res.status(200).json(newAmigo);
+    res.status(201).json(newAmigo);
   } catch (err) {
-    res.status(200).json(err);
+    res.status(500).json(err);
   }
+});
+
+// TODO extend validation to other endpoints, TODO break into separate auth/user route
+const user_schema = joi.object({
+  username: joi.string().required().min(5),
+  phone_number: joi.string().required().min(5),
+});
+
+amigosRoute.post("/users", validateWith(user_schema), async (req, res) => {
+  try {
+    const { username, phone_number } = req.body;
+    const match = await User.find({ phone_number: phone_number });
+    if (match.length) {
+      return res
+        .status(400)
+        .send({
+          error: `A user with the given phone number ${phone_number} already exists.`,
+        });
+    }
+
+    const user = new User({ username, phone_number });
+    user.save();
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+amigosRoute.get("/users", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    return res.send(usersStore.getUsers());
+  }
+});
+
+amigosRoute.post("/auth", validateWith(user_schema), async (req, res) => {
+  const { username, phone_number } = req.body;
+  const query_result = await User.find({ phone_number, username });
+  const user = query_result[0];
+  if (!user || user.phone_number !== phone_number) {
+    return res.status(400).send({ error: "Invalid username or phone_number." });
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, name: user.name, username },
+    "jwtPrivateKey" // TODO update and remove
+  );
+  res.send(token);
 });
 
 export default amigosRoute;
