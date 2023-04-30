@@ -14,3 +14,10 @@ const amigoSchema = new mongoose.Schema({
 });
 
 export const Amigo = mongoose.model("Amigo", amigoSchema);
+
+const userSchema = new mongoose.Schema({
+  username: String,
+  phone_number: String,
+})
+
+export const User = mongoose.model("User", userSchema);
