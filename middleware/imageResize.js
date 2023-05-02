@@ -4,7 +4,7 @@ const fs = require("fs");
 
 const outputFolder = "public/assets";
 
-module.exports = async (req, res, next) => {
+const imageResize = async (req, res, next) => {
   const images = [];
 
   const resizePromises = req.files.map(async (file) => {
@@ -29,3 +29,5 @@ module.exports = async (req, res, next) => {
 
   next();
 };
+
+export default imageResize

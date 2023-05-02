@@ -1,9 +1,9 @@
 import express, { query } from "express";
-import joi from "joi";
+import Joi from "Joi";
 import jwt from "jsonwebtoken";
-import { dbClient } from "../index.js";
 import { Amigo, User } from "../models/index.js";
 import validateWith from "../middleware/validation.js";
+import auth from "../middleware/auth.js";
 
 const amigosRoute = express.Router();
 
@@ -69,9 +69,9 @@ amigosRoute.post("/amigos", async (req, res) => {
 });
 
 // TODO extend validation to other endpoints, TODO break into separate auth/user route
-const user_schema = joi.object({
-  username: joi.string().required().min(5),
-  phone_number: joi.string().required().min(5),
+const user_schema = Joi.object({
+  username: Joi.string().required().min(5),
+  phone_number: Joi.string().required().min(5),
 });
 
 amigosRoute.post("/users", validateWith(user_schema), async (req, res) => {
@@ -79,11 +79,9 @@ amigosRoute.post("/users", validateWith(user_schema), async (req, res) => {
     const { username, phone_number } = req.body;
     const match = await User.find({ phone_number: phone_number });
     if (match.length) {
-      return res
-        .status(400)
-        .send({
-          error: `A user with the given phone number ${phone_number} already exists.`,
-        });
+      return res.status(400).send({
+        error: `A user with the given phone number ${phone_number} already exists.`,
+      });
     }
 
     const user = new User({ username, phone_number });
@@ -118,7 +116,6 @@ amigosRoute.post("/auth", validateWith(user_schema), async (req, res) => {
   res.send(token);
 });
 
-
 amigosRoute.post(
   "/expoPushTokens",
   [auth, validateWith({ token: Joi.string().required() })],
@@ -131,6 +128,5 @@ amigosRoute.post(
     res.status(201).send();
   }
 );
-
 
 export default amigosRoute;
