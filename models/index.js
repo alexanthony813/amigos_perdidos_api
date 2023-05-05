@@ -7,7 +7,7 @@ const amigoSchema = new mongoose.Schema({
   description: String,
   message: String,
   photo_url: String,
-  owner_id: Number,
+  owner_id: String,
   owner_number: String,
   stray: Boolean,
   outdoor_amigo: Boolean,
