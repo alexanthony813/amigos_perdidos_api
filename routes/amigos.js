@@ -111,7 +111,7 @@ amigosRoute.post("/auth", validateWith(user_schema), async (req, res) => {
 
   const token = jwt.sign(
     { userId: user.id, name: user.name, username },
-    "jwtPrivateKey" // TODO update and remove
+    "jwtPrivateKey" // TODO update and remove https://trello.com/c/D2lOwnA1/41-remove-jwtprivatekey
   );
   res.send(token);
 });

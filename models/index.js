@@ -1,23 +1,28 @@
 import mongoose from "mongoose";
 
-const amigoSchema = new mongoose.Schema({
+const { Schema, model } = mongoose;
+
+const userSchema = new Schema({
+  username: String,
+  phone_number: String, //TODO change to password
+});
+
+export const User = model("User", userSchema);
+
+const amigoSchema = new Schema({
   species: String,
   last_seen_address: String,
+  last_seen_date: Date,
   name: String,
+  gender: String,
   description: String,
   message: String,
   photo_url: String,
   owner_id: String,
-  owner_number: String,
   stray: Boolean,
   outdoor_amigo: Boolean,
+  missing: Boolean, // combination w found will make alerts etc
+  found: Boolean, // vice versa
 });
 
-export const Amigo = mongoose.model("Amigo", amigoSchema);
-
-const userSchema = new mongoose.Schema({
-  username: String,
-  phone_number: String,
-})
-
-export const User = mongoose.model("User", userSchema);
+export const Amigo = model("Amigo", amigoSchema);
