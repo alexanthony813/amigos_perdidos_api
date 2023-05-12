@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import express, { query } from "express";
 import Joi from "Joi";
 import jwt from "jsonwebtoken";
@@ -74,17 +75,6 @@ const user_schema = Joi.object({
   password: Joi.string().required().min(5),
 });
 
-amigosRoute.post("/users", validateWith(user_schema), async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const user = new User({ username, password });
-    user.save();
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
 amigosRoute.get("/users", async (req, res) => {
   try {
     const users = await User.find();
@@ -94,17 +84,33 @@ amigosRoute.get("/users", async (req, res) => {
   }
 });
 
+amigosRoute.post("/users", validateWith(user_schema), async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, password: hashedPassword });
+    user.save();
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 amigosRoute.post("/auth", validateWith(user_schema), async (req, res) => {
   const { username, password } = req.body;
-  const query_result = await User.find({ username });
-  const user = query_result[0];
-  if (!user || user.password !== password) {
+  const user = await User.findOne({ username });
+  if (!user) {
+    return res.status(400).send({ error: "Could not find user." });
+  }
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) {
     return res.status(400).send({ error: "Invalid username or password." });
   }
 
   const token = jwt.sign(
-    { userId: user.id, name: user.name, username },
-    "jwtPrivateKey" // TODO update and remove https://trello.com/c/D2lOwnA1/41-remove-jwtprivatekey
+    { userId: user.id, username },
+    process.env.JWT_PRIVATE_KEY
   );
   res.send(token);
 });

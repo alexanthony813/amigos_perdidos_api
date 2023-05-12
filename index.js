@@ -42,8 +42,6 @@ app.get("/", (req, res) => {
 app.use("/", amigosRouter);
 app.use("/s3", s3Router);
 
-// app.listen(())
-
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
