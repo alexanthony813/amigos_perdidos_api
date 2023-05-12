@@ -71,20 +71,13 @@ amigosRoute.post("/amigos", async (req, res) => {
 // TODO extend validation to other endpoints, TODO break into separate auth/user route
 const user_schema = Joi.object({
   username: Joi.string().required().min(5),
-  phone_number: Joi.string().required().min(5),
+  password: Joi.string().required().min(5),
 });
 
 amigosRoute.post("/users", validateWith(user_schema), async (req, res) => {
   try {
-    const { username, phone_number } = req.body;
-    const match = await User.find({ phone_number: phone_number });
-    if (match.length) {
-      return res.status(400).send({
-        error: `A user with the given phone number ${phone_number} already exists.`,
-      });
-    }
-
-    const user = new User({ username, phone_number });
+    const { username, password } = req.body;
+    const user = new User({ username, password });
     user.save();
     res.status(201).json(user);
   } catch (err) {
@@ -102,11 +95,11 @@ amigosRoute.get("/users", async (req, res) => {
 });
 
 amigosRoute.post("/auth", validateWith(user_schema), async (req, res) => {
-  const { username, phone_number } = req.body;
-  const query_result = await User.find({ phone_number, username });
+  const { username, password } = req.body;
+  const query_result = await User.find({ username });
   const user = query_result[0];
-  if (!user || user.phone_number !== phone_number) {
-    return res.status(400).send({ error: "Invalid username or phone_number." });
+  if (!user || user.password !== password) {
+    return res.status(400).send({ error: "Invalid username or password." });
   }
 
   const token = jwt.sign(
