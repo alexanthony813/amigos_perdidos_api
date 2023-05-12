@@ -4,7 +4,7 @@ const { Schema, model } = mongoose;
 
 const userSchema = new Schema({
   username: String,
-  phone_number: String, //TODO change to password
+  password: String,
 });
 
 export const User = model("User", userSchema);
