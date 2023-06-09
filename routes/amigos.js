@@ -34,6 +34,20 @@ amigosRoute.get("/amigos/:amigoId", async (req, res) => {
   }
 });
 
+// blame mongodb atlas auth being fucked
+// amigosRoute.get("/migrate", async (req, res) => {
+//   try {
+//     const updateResult = await Amigo.updateMany({}, { $set: { status: "lost" } });
+//     if (updateResult.error) {
+//       return res.status(500).send(updateResult.error);
+//     } else {
+//       return res.status(200).send();
+//     }
+//   } catch (err) {
+//     return res.status(500).json(err);
+//   }
+// });
+
 amigosRoute.get("/users/:userId/amigos", async (req, res) => {
   const { userId } = req.params;
   if (!userId) {
