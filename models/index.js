@@ -10,7 +10,7 @@ const userSchema = new Schema({
 export const User = model("User", userSchema);
 
 // will try to enforce but just the idea of the lifecycle here. lost and found are exclusive i think at least for UI purposes
-const permittedStatus = ["lost", "found", "sighted", "claimed", "reunited"]
+const permittedStatus = ["lost", "found", "sighted", "claimed", "reunited"];
 
 const amigoSchema = new Schema({
   species: String,
@@ -18,7 +18,7 @@ const amigoSchema = new Schema({
   last_seen_date: Date,
   name: String,
   status: String, // permittedStatus
-  gender: String,
+  sex: String,
   description: String,
   message: String,
   photo_url: String,
