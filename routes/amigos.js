@@ -2,7 +2,13 @@ import bcrypt from "bcrypt";
 import express, { query } from "express";
 import Joi from "Joi";
 import jwt from "jsonwebtoken";
-import { Amigo, StatusEvent, User } from "../models/index.js";
+import {
+  Amigo,
+  StatusEvent,
+  User,
+  PERMITTED_AMIGO_STATUSES,
+  PERMITTED_STATUS_EVENT_STATUSES,
+} from "../models/index.js";
 import validateWith from "../middleware/validation.js";
 import auth from "../middleware/auth.js";
 
@@ -68,6 +74,18 @@ amigosRoute.post("/amigos/:amigoId/event", async (req, res) => {
     if (!newStatusEventJson.amigoId) {
       newStatusEventJson.amigoId = amigoId;
     }
+    if (
+      !newStatusEventJson.status ||
+      PERMITTED_STATUS_EVENT_STATUSES.indexOf(newStatusEventJson.status) === -1
+    ) {
+      return res
+        .status(400)
+        .send(
+          new Error(
+            `Need to include status in ${PERMITTED_STATUS_EVENT_STATUSES}`
+          )
+        );
+    }
     if (newStatusEventJson.amigoId !== amigoId) {
       return res
         .status(404)
@@ -78,12 +96,15 @@ amigosRoute.post("/amigos/:amigoId/event", async (req, res) => {
       return res.status(404).send("amigo not found");
     }
     const now = Date.now();
-    newStatusEventJson.time = now;
+    newStatusEventJson.time = now; // TODO figure out how to remove this for new records
     const newStatusEvent = new StatusEvent(newStatusEventJson);
     newStatusEvent.details = newStatusEventJson.details;
     await newStatusEvent.save();
     amigo.last_status_event = newStatusEvent;
     amigo.last_updated_at = now;
+    if (PERMITTED_AMIGO_STATUSES.indexOf(newStatusEvent.status) > -1) {
+      amigo.status = newStatusEvent.status;
+    }
     await amigo.save();
     res.status(201).json(newStatusEvent);
   } catch (err) {

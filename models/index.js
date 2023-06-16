@@ -20,8 +20,14 @@ const messageSchema = new Schema({
   time_read: Date,
 });
 
-// "claimed" is tricky...want for dogs that are not identified but found
-const permittedStatus = ["lost", "sighted", "found", "reunited"];
+// lost when created unless found
+// found when confirmed another user has control, can send message and create status event but not update actual status
+// reunited when original owner confirms
+// found and unidentified just gets put in found status, in UI check no owner ID to distinguish
+export const PERMITTED_AMIGO_STATUSES = ["lost", "found", "reunited"];
+
+// useful for the UI
+export const PERMITTED_STATUS_EVENT_STATUSES = ["sighted", "claimed"].concat(PERMITTED_AMIGO_STATUSES)
 
 const statusEventSchema = new Schema({
   amigoId: String,
@@ -36,6 +42,7 @@ export const StatusEvent = model("StatusEvent", statusEventSchema);
 const amigoSchema = new Schema({
   species: String,
   last_seen_location: String,
+  last_seen_date: Date,
   name: String,
   status: String, // permittedStatus
   sex: String,
@@ -45,7 +52,7 @@ const amigoSchema = new Schema({
   owner_id: String,
   stray: Boolean,
   owner_aware: Boolean, // can figure out later what the implications are but important to distinguish when the owner is *actually* taking care of the animal
-  last_status_event: Object, 
+  last_status_event: Object,
   last_updated_at: Date,
 });
 
