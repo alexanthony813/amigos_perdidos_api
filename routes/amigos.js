@@ -13,7 +13,7 @@ amigosRoute.get("/amigos", async (req, res) => {
     const amigos = await Amigo.find();
     res.json(amigos.reverse());
   } catch (err) {
-    return res.status(500).json(err);
+    return res.status(500).send(new Error(err));
   }
 });
 
@@ -22,36 +22,72 @@ amigosRoute.get("/events", async (req, res) => {
     const statusEvents = await StatusEvent.find();
     res.json(statusEvents.reverse());
   } catch (err) {
-    return res.status(500).json(err);
+    return res.status(500).send(new Error(err));
   }
 });
 
 amigosRoute.get("/amigos/:amigoId/events", async (req, res) => {
-  
   try {
     const { amigoId } = req.params;
     const statusEvents = await StatusEvent.find({ amigoId });
     res.json(statusEvents.reverse());
   } catch (err) {
-    return res.status(500).json(err);
+    return res.status(500).send(new Error(err));
   }
 });
 
-amigosRoute.post("/amigos/:amigoId/events", async (req, res) => {
+// amigosRoute.post("/amigos/:amigoId/events", async (req, res) => {
+//   try {
+//     const { amigoId } = req.params;
+//     const newStatusEventsJson = await req.body;
+//     const newStatusEvents = [];
+//     await newStatusEventsJson.forEach(async (newStatusEventJson) => {
+//       if (!newStatusEventJson.amigoId) {
+//         newStatusEventJson.amigoId = amigoId;
+//       }
+//       if (newStatusEventJson.amigoId !== amigoId) {
+//         return res
+//           .status(404)
+//           .send("amigoId in body needs to match same in route");
+//       }
+//       newStatusEventJson.time = Date.now();
+//       const newStatusEvent = new StatusEvent(newStatusEventJson);
+//       newStatusEvents.push(newStatusEvent);
+//       await newStatusEvent.save();
+//     });
+//     res.status(201).json(newStatusEvents);
+//   } catch (err) {
+//     res.status(500).send(new Error(err));
+//   }
+// });
+
+amigosRoute.post("/amigos/:amigoId/event", async (req, res) => {
   try {
     const { amigoId } = req.params;
+    const newStatusEventJson = await req.body;
     if (!newStatusEventJson.amigoId) {
-      newStatusEventJson.amigoId = amigoId
+      newStatusEventJson.amigoId = amigoId;
     }
     if (newStatusEventJson.amigoId !== amigoId) {
-      return res.status(404).send('amigoId in body needs to match same in route')
+      return res
+        .status(404)
+        .send("amigoId in body needs to match same in route");
     }
-    const newStatusEventJson = await req.body;
+    const amigo = await Amigo.findOne({ _id: amigoId });
+    if (!amigo) {
+      return res.status(404).send("amigo not found");
+    }
+    const now = Date.now();
+    newStatusEventJson.time = now;
     const newStatusEvent = new StatusEvent(newStatusEventJson);
-    newStatusEvent.save();
+    newStatusEvent.details = newStatusEventJson.details;
+    await newStatusEvent.save();
+    amigo.last_status_event = newStatusEvent;
+    amigo.last_updated_at = now;
+    await amigo.save();
     res.status(201).json(newStatusEvent);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).send(new Error(err));
   }
 });
 
@@ -68,34 +104,34 @@ amigosRoute.get("/amigos/:amigoId", async (req, res) => {
       return res.json(amigo);
     }
   } catch (err) {
-    return res.status(500).json(err);
+    return res.status(500).send(new Error(err));
   }
 });
 
-// blame mongodb atlas auth being fucked
-amigosRoute.get("/migrate", async (req, res) => {
-  try {
-    const amigos = await Amigo.find();
-    // const statusEvents = []
-    amigos.forEach((amigo) => {
-      const newStatusEvent = new StatusEvent({
-        time: Date.now(),
-        amigoId: amigo._id,
-        status: 'lost',
-        location: null
-      })
-      amigo.updateOne({ lastStatusEvent: JSON.stringify(newStatusEvent) })
-      newStatusEvent.save()
-    })
-    if (updateResult.error) {
-      return res.status(500).send(updateResult.error);
-    } else {
-      return res.status(200).send();
-    }
-  } catch (err) {
-    return res.status(500).json(err);
-  }
-});
+// blame mongodb atlas auth :'(
+// amigosRoute.get("/migrate", async (req, res) => {
+//   try {
+//     const amigos = await Amigo.find();
+//     // const statusEvents = []
+//     amigos.forEach((amigo) => {
+//       const newStatusEvent = new StatusEvent({
+//         time: Date.now(),
+//         amigoId: amigo._id,
+//         status: 'lost',
+//         location: null
+//       })
+//       amigo.updateOne({ lastStatusEvent: JSON.stringify(newStatusEvent) })
+//       await newStatusEvent.save()
+//     })
+//     if (updateResult.error) {
+//       return res.status(500).send(updateResult.error);
+//     } else {
+//       return res.status(200).send();
+//     }
+//   } catch (err) {
+//     return res.status(500).send(new Error(err));
+//   }
+// });
 
 amigosRoute.get("/users/:userId/amigos", async (req, res) => {
   const { userId } = req.params;
@@ -105,12 +141,12 @@ amigosRoute.get("/users/:userId/amigos", async (req, res) => {
   try {
     const amigo = await Amigo.find({ owner_id: userId });
     if (!amigo) {
-      return res.status(404).send();
+      return res.status(404).seend();
     } else {
       return res.json(amigo);
     }
   } catch (err) {
-    return res.status(500).json(err);
+    return res.status(500).send(new Error(err));
   }
 });
 
@@ -125,10 +161,10 @@ amigosRoute.post("/amigos", async (req, res) => {
       species = "cat";
     }
     const newAmigo = new Amigo(newAmigoJson);
-    newAmigo.save();
+    await newAmigo.save();
     res.status(201).json(newAmigo);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).send(new Error(err));
   }
 });
 
@@ -152,10 +188,10 @@ amigosRoute.post("/users", validateWith(user_schema), async (req, res) => {
     const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashedPassword });
-    user.save();
+    await user.save();
     res.status(201).json(user);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).send(new Error(err));
   }
 });
 
