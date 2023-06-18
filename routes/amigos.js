@@ -56,7 +56,7 @@ amigosRoute.get("/amigos/:amigoId/events", async (req, res) => {
 //           .status(404)
 //           .send("amigoId in body needs to match same in route");
 //       }
-//       newStatusEventJson.time = Date.now();
+//       newStatusEventJson.time = new Date();
 //       const newStatusEvent = new StatusEvent(newStatusEventJson);
 //       newStatusEvents.push(newStatusEvent);
 //       await newStatusEvent.save();
@@ -95,7 +95,7 @@ amigosRoute.post("/amigos/:amigoId/event", async (req, res) => {
     if (!amigo) {
       return res.status(404).send("amigo not found");
     }
-    const now = Date.now();
+    const now = new Date();
     newStatusEventJson.time = now; // TODO figure out how to remove this for new records
     const newStatusEvent = new StatusEvent(newStatusEventJson);
     newStatusEvent.details = newStatusEventJson.details;
@@ -136,7 +136,7 @@ amigosRoute.get("/amigos/:amigoId", async (req, res) => {
 //     // const statusEvents = []
 //     amigos.forEach((amigo) => {
 //       const newStatusEvent = new StatusEvent({
-//         time: Date.now(),
+//         time: new Date(),
 //         amigoId: amigo._id,
 //         status: 'lost',
 //         location: null
