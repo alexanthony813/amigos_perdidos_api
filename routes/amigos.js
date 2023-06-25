@@ -17,7 +17,7 @@ const amigosRoute = express.Router();
 amigosRoute.get("/amigos", async (req, res) => {
   try {
     const amigos = await Amigo.find();
-    res.json(amigos.reverse());
+    return res.json(amigos.reverse());
   } catch (err) {
     return res.status(500).send(new Error(err));
   }
@@ -26,7 +26,7 @@ amigosRoute.get("/amigos", async (req, res) => {
 amigosRoute.get("/events", async (req, res) => {
   try {
     const statusEvents = await StatusEvent.find();
-    res.json(statusEvents.reverse());
+    return res.json(statusEvents.reverse());
   } catch (err) {
     return res.status(500).send(new Error(err));
   }
@@ -36,7 +36,7 @@ amigosRoute.get("/amigos/:amigoId/events", async (req, res) => {
   try {
     const { amigoId } = req.params;
     const statusEvents = await StatusEvent.find({ amigoId });
-    res.json(statusEvents.reverse());
+    return res.json(statusEvents.reverse());
   } catch (err) {
     return res.status(500).send(new Error(err));
   }
@@ -61,9 +61,9 @@ amigosRoute.get("/amigos/:amigoId/events", async (req, res) => {
 //       newStatusEvents.push(newStatusEvent);
 //       await newStatusEvent.save();
 //     });
-//     res.status(201).json(newStatusEvents);
+//     return res.status(201).json(newStatusEvents);
 //   } catch (err) {
-//     res.status(500).send(new Error(err));
+//     return res.status(500).send(new Error(err));
 //   }
 // });
 
@@ -106,9 +106,9 @@ amigosRoute.post("/amigos/:amigoId/event", async (req, res) => {
       amigo.status = newStatusEvent.status;
     }
     await amigo.save();
-    res.status(201).json(newStatusEvent);
+    return res.status(201).json(newStatusEvent);
   } catch (err) {
-    res.status(500).send(new Error(err));
+    return res.status(500).send(new Error(err));
   }
 });
 
@@ -183,9 +183,9 @@ amigosRoute.post("/amigos", async (req, res) => {
     }
     const newAmigo = new Amigo(newAmigoJson);
     await newAmigo.save();
-    res.status(201).json(newAmigo);
+    return res.status(201).json(newAmigo);
   } catch (err) {
-    res.status(500).send(new Error(err));
+    return res.status(500).send(new Error(err));
   }
 });
 
@@ -198,7 +198,7 @@ const user_schema = Joi.object({
 amigosRoute.get("/users", async (req, res) => {
   try {
     const users = await User.find();
-    res.json(users);
+    return res.json(users);
   } catch (err) {
     return res.send(usersStore.getUsers());
   }
@@ -210,9 +210,9 @@ amigosRoute.post("/users", validateWith(user_schema), async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashedPassword });
     await user.save();
-    res.status(201).json(user);
+    return res.status(201).json(user);
   } catch (err) {
-    res.status(500).send(new Error(err));
+    return res.status(500).send(new Error(err));
   }
 });
 
@@ -232,7 +232,7 @@ amigosRoute.post("/auth", validateWith(user_schema), async (req, res) => {
     { userId: user.id, username },
     process.env.JWT_PRIVATE_KEY
   );
-  res.send(token);
+  return res.send(token);
 });
 
 amigosRoute.post(
@@ -244,7 +244,7 @@ amigosRoute.post(
 
     user.expoPushToken = req.body.token;
     console.log("User registered for notifications: ", user);
-    res.status(201).send();
+    return res.status(201).send();
   }
 );
 
