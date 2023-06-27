@@ -15,10 +15,14 @@ export const User = model("User", userSchema);
 const messageSchema = new Schema({
   sender_id: String,
   receiver_id: String,
+  amigo_id: String,
   text: String,
   time_sent: Date,
   time_read: Date,
+  expo_message_id: String
 });
+
+export const Message = model("Message", messageSchema)
 
 // lost when created unless found
 // found when confirmed another user has control, can send message and create status event but not update actual status
@@ -27,10 +31,12 @@ const messageSchema = new Schema({
 export const PERMITTED_AMIGO_STATUSES = ["lost", "found", "reunited"];
 
 // useful for the UI
-export const PERMITTED_STATUS_EVENT_STATUSES = ["sighted", "claimed"].concat(PERMITTED_AMIGO_STATUSES)
+export const PERMITTED_STATUS_EVENT_STATUSES = ["sighted", "claimed"].concat(
+  PERMITTED_AMIGO_STATUSES
+);
 
 const statusEventSchema = new Schema({
-  amigoId: String,
+  amigo_id: String,
   status: String,
   time: Date,
   details: Object,
