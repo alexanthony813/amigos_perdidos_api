@@ -13,16 +13,18 @@ export const User = model("User", userSchema);
 // sighted vs found difference is if the user has secured the dog, might not allow sighted without account
 // should automatically send message, next
 const messageSchema = new Schema({
-  sender_id: String,
-  receiver_id: String,
+  from: String,
+  recipient_id: String,
   amigo_id: String,
-  text: String,
+  title: String,
+  body: String,
+  data: Object,
   time_sent: Date,
   time_read: Date,
-  expo_message_id: String
+  expo_message_id: String,
 });
 
-export const Message = model("Message", messageSchema)
+export const Message = model("Message", messageSchema);
 
 // lost when created unless found
 // found when confirmed another user has control, can send message and create status event but not update actual status
@@ -53,7 +55,6 @@ const amigoSchema = new Schema({
   status: String, // permittedStatus
   sex: String,
   description: String,
-  message: String,
   photo_url: String,
   owner_id: String,
   stray: Boolean,

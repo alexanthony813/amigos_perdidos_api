@@ -1,12 +1,9 @@
-import bcrypt from "bcrypt";
-import https from "https";
 import express from "express";
 import fetch from "node-fetch";
-import { Expo } from "expo-server-sdk";
+import { Message } from "../models/index.js";
 
 // Create a new Expo SDK client
 // optionally providing an access token if you have enabled push security
-let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 const messagesRouter = express.Router();
 
 // this has taken way too long already...and I want this to work for iOS without surprises
@@ -15,7 +12,7 @@ const messagesRouter = express.Router();
 messagesRouter.get("/users/:userId/messages", async (req, res) => {
   try {
     const messages = await Message.find({
-      $or: [{ sender_id: userId }, { receiver_id: userId }],
+      $or: [{ from: userId }, { recepient: userId }],
     });
 
     return res.json(messages.reverse());
@@ -24,27 +21,37 @@ messagesRouter.get("/users/:userId/messages", async (req, res) => {
   }
 });
 
-messagesRouter.get("/messages", async (req, res) => {
+messagesRouter.post("/messages", async (req, res) => {
   try {
-    // const newMessageJson = await req.body;
-    // send message to expo
-    const expoMessage = await fetch("https://exp.host/--/api/v2/push/send", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify([{
-        to: "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
-        title: "hello",
-        body: "world",
-      }]),
-    });
-    // const { species } = newMessageJson;
-    // const newMessage = new Message(newMessageJson);
-    // await newMessage.save();
-    const response = await expoMessage.json()
-    return res.json(response);
+    const { message } = req.body;
+    const { expo_message } = message;
+
+    const expoMessageRequest = await fetch(
+      "https://exp.host/--/api/v2/push/send",
+      {
+        method: "POST",
+        headers: {
+          host: "exp.host",
+          accept: "application/json",
+          "accept-encoding": "gzip, deflate",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify([expo_message]), // TODO and below make array compatible before merge plzzzz
+      }
+    );
+    const newMessage = new Message(message);
+    const expoResponse = await expoMessageRequest.json();
+    if (expoResponse.data && expoResponse.data[0] && expoResponse.data[0].status === "ok") {
+      console.log("expoResponse ok!!!!");
+      console.dir(expoResponse);
+      newMessage.expo_message_id = expoResponse.data.id;
+      newMessage.amigo_id = newMessage.amigoId; // TODO BEFORE MERGE
+      await newMessage.save();
+      return res.json({ expoResponse, message: newMessage });
+    } else {
+      console.log("expoResponse not okurr!!!!");
+      return res.status(500).send(expoResponse);
+    }
   } catch (err) {
     return res.status(500).send(new Error(err));
   }
