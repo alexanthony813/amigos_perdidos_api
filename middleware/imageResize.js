@@ -30,4 +30,4 @@ const imageResize = async (req, res, next) => {
   next();
 };
 
-export default imageResize
+export default imageResize;
