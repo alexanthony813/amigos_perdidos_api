@@ -1,7 +1,5 @@
 import express from "express";
-import {
-  Amigo,
-} from "../models/index.js";
+import { Amigo } from "../models/index.js";
 
 const amigosRouter = express.Router();
 
@@ -90,7 +88,5 @@ amigosRouter.post("/amigos", async (req, res) => {
     return res.status(500).send(new Error(err));
   }
 });
-
-
 
 export default amigosRouter;

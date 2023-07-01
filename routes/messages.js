@@ -41,7 +41,11 @@ messagesRouter.post("/messages", async (req, res) => {
     );
     const newMessage = new Message(message);
     const expoResponse = await expoMessageRequest.json();
-    if (expoResponse.data && expoResponse.data[0] && expoResponse.data[0].status === "ok") {
+    if (
+      expoResponse.data &&
+      expoResponse.data[0] &&
+      expoResponse.data[0].status === "ok"
+    ) {
       console.log("expoResponse ok!!!!");
       console.dir(expoResponse);
       newMessage.expo_message_id = expoResponse.data.id;

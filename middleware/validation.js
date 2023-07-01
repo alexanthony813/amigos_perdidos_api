@@ -7,4 +7,4 @@ const validateSchema = (schema) => (req, res, next) => {
   next();
 };
 
-export default validateSchema
+export default validateSchema;
