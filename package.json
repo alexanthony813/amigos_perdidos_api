@@ -24,6 +24,8 @@
     "node-fetch": "^3.3.1",
     "node-geocoder": "^4.2.0",
     "node-migrate": "^0.1.0",
+    "pg": "^8.10.0",
+    "redux-thunk": "^2.4.2"
   },
   "devDependencies": {
     "migrate-mongo": "^8.1.4",
