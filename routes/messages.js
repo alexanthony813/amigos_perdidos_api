@@ -1,6 +1,27 @@
 import express from "express";
 import fetch from "node-fetch";
 import { Message } from "../models/index.js";
+import crypto from "crypto";
+
+const algorithm = "aes-256-cbc";
+
+const key = crypto.randomBytes(32);
+const iv = crypto.randomBytes(16);
+let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+
+const encryptText = (text) => {
+  let cipher = crypto.createCipheriv(algorithm, Buffer.from(key), iv);
+  let encrypted = cipher.update(text);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  return encrypted.toString("hex");
+};
+
+const decryptText = (text) => {
+  let encryptedText = Buffer.from(text, "hex");
+  let decrypted = decipher.update(encryptedText);
+  decrypted = Buffer.concat([decrypted, decipher.final()]);
+  return decrypted.toString();
+};
 
 // Create a new Expo SDK client
 // optionally providing an access token if you have enabled push security
@@ -13,6 +34,9 @@ messagesRouter.get("/users/:userId/messages", async (req, res) => {
   try {
     const messages = await Message.find({
       $or: [{ from: userId }, { recepient: userId }],
+    }).map((result) => {
+      result.body = decryptText(result.body);
+      return result;
     });
 
     return res.json(messages.reverse());
@@ -46,14 +70,12 @@ messagesRouter.post("/messages", async (req, res) => {
       expoResponse.data[0] &&
       expoResponse.data[0].status === "ok"
     ) {
-      console.log("expoResponse ok!!!!");
-      console.dir(expoResponse);
       newMessage.expo_message_id = expoResponse.data.id;
-      newMessage.amigo_id = newMessage.amigoId; // TODO BEFORE MERGE
+      newMessage.amigo_id = newMessage.amigo_id;
+      newMessage.body = encryptText(newMessage.body);
       await newMessage.save();
       return res.json({ expoResponse, message: newMessage });
     } else {
-      console.log("expoResponse not okurr!!!!");
       return res.status(500).send(expoResponse);
     }
   } catch (err) {
