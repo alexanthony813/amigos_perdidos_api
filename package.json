@@ -23,7 +23,7 @@
     "mongoose": "^7.0.3",
     "node-fetch": "^3.3.1",
     "node-geocoder": "^4.2.0",
-    "node-migrate": "^0.1.0",
+    "node-migrate": "^0.1.0"
   },
   "devDependencies": {
     "migrate-mongo": "^8.1.4",
