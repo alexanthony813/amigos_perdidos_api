@@ -23,9 +23,7 @@
     "mongoose": "^7.0.3",
     "node-fetch": "^3.3.1",
     "node-geocoder": "^4.2.0",
-    "node-migrate": "^0.1.0",
-    "pg": "^8.10.0",
-    "redux-thunk": "^2.4.2"
+    "node-migrate": "^0.1.0"
   },
   "devDependencies": {
     "migrate-mongo": "^8.1.4",
