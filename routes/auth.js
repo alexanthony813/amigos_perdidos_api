@@ -13,7 +13,7 @@ authRouter.get("/users", async (req, res) => {
     const users = await User.find();
     return res.json(users);
   } catch (err) {
-    return res.send(usersStore.getUsers());
+    return res.send(usersStore.getUsers()); // wtf? TODO
   }
 });
 
@@ -25,7 +25,7 @@ authRouter.post("/users", validateWith(userSchema), async (req, res) => {
     await user.save();
     return res.status(201).json(user);
   } catch (err) {
-    return res.status(500).send(new Error(err));
+    return next(err);
   }
 });
 

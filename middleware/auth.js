@@ -8,9 +8,9 @@ const auth = (req, res, next) => {
   try {
     const payload = jwt.verify(token, "jwtPrivateKey"); // TODO remove and add real key
     req.user = payload;
-    next();
+    return next();
   } catch (err) {
-    res.status(400).send({ error: "Invalid token." });
+    return next(err)
   }
 };
 

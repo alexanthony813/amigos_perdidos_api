@@ -27,13 +27,13 @@ const messageSchema = new Schema({
 export const Message = model("Message", messageSchema);
 
 // lost when created unless found
-// found when confirmed another user has control, can send message and create status event but not update actual status
+// found for obvious pets that were found with no owner info
 // reunited when original owner confirms
-// found and unidentified just gets put in found status, in UI check no owner ID to distinguish
 export const PERMITTED_AMIGO_STATUSES = ["lost", "found", "reunited"];
 
-// useful for the UI
-export const PERMITTED_STATUS_EVENT_STATUSES = ["sighted", "claimed"].concat(
+// lost can have events with status (sighted) or even (recovered) before finally reunited
+// found just goes straight to reunited 
+export const PERMITTED_STATUS_EVENT_STATUSES = ["sighted", "recovered"].concat(
   PERMITTED_AMIGO_STATUSES
 );
 
