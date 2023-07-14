@@ -52,7 +52,7 @@ eventsRouter.post("/amigos/:amigo_id/event", async (req, res, next) => {
     const now = new Date();
     newStatusEventJson.time = now; // TODO figure out how to remove this for new records
     const newStatusEvent = new StatusEvent(newStatusEventJson);
-    newStatusEvent.details = newStatusEventJson.details;
+    newStatusEvent.details = JSON.parse(newStatusEventJson.details);
     await newStatusEvent.save();
     amigo.last_status_event = newStatusEvent;
     amigo.last_updated_at = now;
