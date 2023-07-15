@@ -17,22 +17,22 @@ eventsRouter.get("/events", async (req, res) => {
   }
 });
 
-eventsRouter.get("/amigos/:amigo_id/events", async (req, res) => {
+eventsRouter.get("/amigos/:amigoId/events", async (req, res) => {
   try {
-    const { amigo_id } = req.params;
-    const statusEvents = await StatusEvent.find({ amigo_id });
+    const { amigoId } = req.params;
+    const statusEvents = await StatusEvent.find({ amigoId });
     return res.json(statusEvents.reverse());
   } catch (err) {
     return next(err);
   }
 });
 
-eventsRouter.post("/amigos/:amigo_id/event", async (req, res, next) => {
+eventsRouter.post("/amigos/:amigoId/event", async (req, res, next) => {
   try {
-    const { amigo_id } = req.params;
+    const { amigoId } = req.params;
     const newStatusEventJson = await req.body;
-    if (!newStatusEventJson.amigo_id) {
-      newStatusEventJson.amigo_id = amigo_id;
+    if (!newStatusEventJson.amigoId) {
+      newStatusEventJson.amigoId = amigoId;
     }
     if (
       !newStatusEventJson.status ||
@@ -40,12 +40,12 @@ eventsRouter.post("/amigos/:amigo_id/event", async (req, res, next) => {
     ) {
       return next(new Error(`Need to include valid even† status`));
     }
-    if (newStatusEventJson.amigo_id !== amigo_id) {
+    if (newStatusEventJson.amigoId !== amigoId) {
       return res
         .status(404)
-        .send("amigo_id in body needs to match same in route");
+        .send("amigoId in body needs to match same in route");
     }
-    const amigo = await Amigo.findOne({ _id: amigo_id });
+    const amigo = await Amigo.findOne({ _id: amigoId });
     if (!amigo) {
       return res.status(404).send("amigo not found");
     }
@@ -54,8 +54,8 @@ eventsRouter.post("/amigos/:amigo_id/event", async (req, res, next) => {
     const newStatusEvent = new StatusEvent(newStatusEventJson);
     newStatusEvent.details = JSON.parse(newStatusEventJson.details);
     await newStatusEvent.save();
-    amigo.last_status_event = newStatusEvent;
-    amigo.last_updated_at = now;
+    amigo.lastStatusEvent = newStatusEvent;
+    amigo.lastUpdatedAt = now;
     if (PERMITTED_AMIGO_STATUSES.indexOf(newStatusEvent.status) > -1) {
       amigo.status = newStatusEvent.status;
     }
