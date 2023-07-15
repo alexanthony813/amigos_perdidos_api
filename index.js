@@ -2,9 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import amigosRouter from "./routes/amigos.js";
-import authRouter from "./routes/events.js";
 import eventsRouter from "./routes/events.js";
-import messagesRouter from "./routes/messages.js";
 import s3Router from "./routes/s3.js";
 import mongoose from "mongoose";
 
@@ -42,8 +40,6 @@ app.get("/", (req, res) => {
 
 app.use("/", amigosRouter);
 app.use("/", eventsRouter);
-app.use("/", authRouter);
-app.use("/", messagesRouter);
 
 app.use("/s3", s3Router);
 
