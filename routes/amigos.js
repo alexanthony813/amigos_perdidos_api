@@ -63,13 +63,13 @@ amigosRouter.get("/amigos", async (req, res, next) => {
   }
 });
 
-amigosRouter.get("/amigos/:amigo_id", async (req, res, next) => {
-  const { amigo_id } = req.params;
-  if (!amigo_id) {
+amigosRouter.get("/amigos/:amigoId", async (req, res, next) => {
+  const { amigoId } = req.params;
+  if (!amigoId) {
     return res.status(400).send();
   }
   try {
-    const amigo = await Amigo.findOne({ _id: amigo_id });
+    const amigo = await Amigo.findOne({ _id: amigoId });
     if (!amigo) {
       return res.status(404).send();
     } else {
@@ -95,7 +95,7 @@ amigosRouter.get("/users/:userId/amigos", async (req, res, next) => {
     return res.status(400).send();
   }
   try {
-    const amigo = await Amigo.find({ owner_id: userId });
+    const amigo = await Amigo.find({ ownerId: userId });
     if (!amigo) {
       return res.status(404).send();
     } else {

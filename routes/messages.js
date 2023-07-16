@@ -41,7 +41,7 @@
 //     if (expoResponse?.data[0]?.status === "ok") {
 //       // is this right or expoResponse &&
 //       newMessage.expo_message_id = expoResponse.data.id;
-//       newMessage.amigo_id = newMessage.amigo_id;
+//       newMessage.amigoId = newMessage.amigoId;
 //       await newMessage.save();
 //       return res.json({ expoResponse, message: newMessage });
 //     } else {
