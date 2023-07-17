@@ -117,6 +117,7 @@ amigosRouter.post("/amigos", async (req, res) => {
       species = "cat";
     }
     const newAmigo = new Amigo(newAmigoJson);
+    newAmigo.lastSeenDate = new Date()
     await newAmigo.save();
     return res.status(201).json(newAmigo);
   } catch (err) {
