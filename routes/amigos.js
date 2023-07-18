@@ -4,7 +4,7 @@ import { userSchema, User, Amigo } from "../models/index.js";
 import jwt from "jsonwebtoken";
 
 const amigosRouter = express.Router();
-amigosRouter.post("/users", async (req, res) => {
+amigosRouter.post("/users", async (req, res, next) => {
   try {
     const { phoneNumber } = req.body; // password
     // const hashedPassword = await bcrypt.hash(password, 10);
@@ -16,7 +16,7 @@ amigosRouter.post("/users", async (req, res) => {
   }
 });
 
-amigosRouter.patch("/users/:userId", async (req, res) => {
+amigosRouter.patch("/users/:userId", async (req, res, next) => {
   try {
     const { userId } = req.params;
     const { expoPushToken } = req.body;
@@ -35,23 +35,26 @@ amigosRouter.patch("/users/:userId", async (req, res) => {
   }
 });
 
-amigosRouter.post("/auth", async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (!user) {
-    return res.status(400).send({ error: "Could not find user." });
-  }
+amigosRouter.post("/auth", async (req, res, next) => {
+  try {
+    const { phoneNumber } = req.body;
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return next(new Error("Could not find the phone number."));
+    }
+    // const passwordMatch = await bcrypt.compare(password, user.password);
+    // if (!passwordMatch) {
+    //   return res.status(400).send({ error: "Invalid username or password." });
+    // }
 
-  const passwordMatch = await bcrypt.compare(password, user.password);
-  if (!passwordMatch) {
-    return res.status(400).send({ error: "Invalid username or password." });
+    const token = jwt.sign(
+      { userId: user._id, phoneNumber },
+      process.env.JWT_PRIVATE_KEY
+    );
+    return res.status(201).json(token);
+  } catch (err) {
+    return next(err);
   }
-
-  const token = jwt.sign(
-    { userId: user.id, username },
-    process.env.JWT_PRIVATE_KEY
-  );
-  return res.send(token);
 });
 
 amigosRouter.get("/amigos", async (req, res, next) => {
@@ -117,7 +120,7 @@ amigosRouter.post("/amigos", async (req, res) => {
       species = "cat";
     }
     const newAmigo = new Amigo(newAmigoJson);
-    newAmigo.lastSeenDate = new Date()
+    newAmigo.lastSeenDate = new Date();
     await newAmigo.save();
     return res.status(201).json(newAmigo);
   } catch (err) {
