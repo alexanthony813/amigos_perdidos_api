@@ -1,5 +1,5 @@
 import express from "express";
-import { userSchema, User, Amigo } from "../models/index.js";
+import { Quiltro, User, Amigo } from "../models/index.js";
 // import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -123,6 +123,35 @@ amigosRouter.post("/amigos", async (req, res) => {
     newAmigo.lastSeenDate = new Date();
     await newAmigo.save();
     return res.status(201).json(newAmigo);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+
+amigosRouter.post("/quiltros", async (req, res) => {
+  try {
+    const newQuiltroJson = await req.body;
+    const newQuiltro = new Quiltro(newQuiltroJson);
+    await newQuiltro.save();
+    return res.status(201).json(newQuiltro);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+amigosRouter.get("/users/:userId/quiltros", async (req, res, next) => {
+  const { userId } = req.params;
+  if (!userId) {
+    return res.status(400).send();
+  }
+  try {
+    const quiltro = await Quiltro.find({ userId: userId });
+    if (!quiltro) {
+      return res.status(404).send();
+    } else {
+      return res.json(quiltro);
+    }
   } catch (err) {
     return next(err);
   }

@@ -36,7 +36,7 @@ async function generatePresignedUrl() {
 
 s3Route.get("/", async (req, res) => {
   const url = await generatePresignedUrl();
-  res.send({ url });
+  return res.send({ url });
 });
 
 export default s3Route;
