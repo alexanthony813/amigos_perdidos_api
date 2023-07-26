@@ -48,3 +48,21 @@ const amigoSchema = new Schema({
 });
 
 export const Amigo = model("Amigo", amigoSchema);
+
+const quiltroSchema = new Schema({
+  name: String,
+  age: String,
+  favoriteFoods: String,
+  cannotOrWontEat: String,
+  location: String,
+  userId: String,
+  photoUrl: String,
+  // requested_items: '',
+  // medical_issues: '',
+  // medical_history: '',
+  // health_issues: '',
+  // chip_id: '',
+  // nose_id: '',
+});
+
+export const Quiltro = model("Quiltro", quiltroSchema);
