@@ -8,7 +8,7 @@ dotenv.config();
 const s3Route = express.Router();
 
 const region = "sa-east-1";
-const bucketName = "amigosperdidos";
+const bucketName = "amigosperdidos"; // todo
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
