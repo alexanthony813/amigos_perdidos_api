@@ -9,45 +9,13 @@ export const userSchema = new Schema({
 
 export const User = model("User", userSchema);
 
-// lost when created unless found
-// found for obvious pets that were found with no owner info
-// reunited when original owner confirms
-export const PERMITTED_AMIGO_STATUSES = ["lost", "found", "reunited"];
-
-// lost can have events with status (sighted) or even (recovered) before finally reunited
-// found just goes straight to reunited
-export const PERMITTED_STATUS_EVENT_STATUSES = ["sighted", "recovered"].concat(
-  PERMITTED_AMIGO_STATUSES
-);
-
 const statusEventSchema = new Schema({
-  amigoId: String,
-  status: String,
+  quiltroId: String,
   time: Date,
-  details: Object,
-  photoUrl: String,
+  location: String,
 });
 
 export const StatusEvent = model("StatusEvent", statusEventSchema);
-
-const amigoSchema = new Schema({
-  species: String,
-  lastSeenLocation: String,
-  lastSeenDate: Date,
-  name: String,
-  status: String, // permittedStatus
-  sex: String,
-  description: String,
-  photoUrl: String,
-  ownerId: String,
-  stray: Boolean,
-  isOwnerAware: Boolean, // can figure out later what the implications are but important to distinguish when the owner is *actually* taking care of the animal
-  lastStatusEvent: Object,
-  lastUpdatedAt: Date,
-  user: Object, // TODO this doesn't allow for changes, need to switch to Postgres
-});
-
-export const Amigo = model("Amigo", amigoSchema);
 
 const quiltroSchema = new Schema({
   name: String,
@@ -55,8 +23,10 @@ const quiltroSchema = new Schema({
   favoriteFoods: String,
   cannotOrWontEat: String,
   location: String,
-  userId: String,
   photoUrl: String,
+  requestedItems: String,
+  lastStatusEvent: Object,
+  userId: Object, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
   // requested_items: '',
   // medical_issues: '',
   // medical_history: '',

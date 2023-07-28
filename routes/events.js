@@ -1,8 +1,6 @@
 import {
-  Amigo,
   StatusEvent,
-  PERMITTED_AMIGO_STATUSES,
-  PERMITTED_STATUS_EVENT_STATUSES,
+  Quiltro,
 } from "../models/index.js";
 import express from "express";
 
@@ -17,49 +15,39 @@ eventsRouter.get("/events", async (req, res) => {
   }
 });
 
-eventsRouter.get("/amigos/:amigoId/events", async (req, res) => {
+eventsRouter.get("/quiltros/:quiltroId/events", async (req, res) => {
   try {
-    const { amigoId } = req.params;
-    const statusEvents = await StatusEvent.find({ amigoId });
+    const { quiltroId } = req.params;
+    const statusEvents = await StatusEvent.find({ quiltroId });
     return res.json(statusEvents.reverse());
   } catch (err) {
     return next(err);
   }
 });
 
-eventsRouter.post("/amigos/:amigoId/event", async (req, res, next) => {
+eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
   try {
-    const { amigoId } = req.params;
+    const { quiltroId } = req.params;
     const newStatusEventJson = await req.body;
-    if (!newStatusEventJson.amigoId) {
-      newStatusEventJson.amigoId = amigoId;
+    if (!newStatusEventJson.quiltroId) {
+      newStatusEventJson.quiltroId = quiltroId;
     }
-    if (
-      !newStatusEventJson.status ||
-      PERMITTED_STATUS_EVENT_STATUSES.indexOf(newStatusEventJson.status) === -1
-    ) {
-      return next(new Error(`Need to include valid even† status`));
-    }
-    if (newStatusEventJson.amigoId !== amigoId) {
+    if (newStatusEventJson.quiltroId !== quiltroId) {
       return res
         .status(404)
-        .send("amigoId in body needs to match same in route");
+        .send("quiltroId in body needs to match same in route");
     }
-    const amigo = await Amigo.findOne({ _id: amigoId });
-    if (!amigo) {
-      return res.status(404).send("amigo not found");
+    const quiltro = await Quiltro.findOne({ _id: quiltroId });
+    if (!quiltro) {
+      return res.status(404).send("quiltro not found");
     }
     const now = new Date();
     newStatusEventJson.time = now; // TODO figure out how to remove this for new records
     const newStatusEvent = new StatusEvent(newStatusEventJson);
-    newStatusEvent.details = JSON.parse(newStatusEventJson.details);
     await newStatusEvent.save();
-    amigo.lastStatusEvent = newStatusEvent;
-    amigo.lastUpdatedAt = now;
-    if (PERMITTED_AMIGO_STATUSES.indexOf(newStatusEvent.status) > -1) {
-      amigo.status = newStatusEvent.status;
-    }
-    await amigo.save();
+    quiltro.lastStatusEvent = newStatusEvent;
+    quiltro.lastUpdatedAt = now;
+    await quiltro.save();
     return res.status(201).json(newStatusEvent);
   } catch (err) {
     return next(err);

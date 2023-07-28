@@ -1,16 +1,16 @@
 version: "3.8"
 services:
   api:
-    image: amigos_api
+    image: quiltros_api
     build: ./
     ports:
       - "3000:3000"
     depends_on:
       - db
     environment:
-      MONGO_DB_URL: mongodb://db/amigos_api
+      MONGO_DB_URL: mongodb://db/quiltros_api
     volumes:
-      - amigos_api:/data/db
+      - quiltros_api:/data/db
     command:
       - npm start
   db:
@@ -18,8 +18,8 @@ services:
     ports:
       - "27017:27017"
     environment:
-      - DB_URL=mongodb://db/amigos_api
+      - DB_URL=mongodb://db/quiltros_api
     volumes:
-      - amigos_api:/data/db
+      - quiltros_api:/data/db
 volumes:
-  amigos_api:
+  quiltros_api:

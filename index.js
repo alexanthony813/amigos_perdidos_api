@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import amigosRouter from "./routes/amigos.js";
+import quiltrosRouter from "./routes/quiltros.js";
 import eventsRouter from "./routes/events.js";
 import s3Router from "./routes/s3.js";
 import mongoose from "mongoose";
@@ -13,7 +13,7 @@ export let dbClient;
 const connectDb = async () => {
   try {
     const mongoUrl = process.env.MONGO_DB_URL;
-    dbClient = await mongoose.connect(mongoUrl, { dbName: "amigos" });
+    dbClient = await mongoose.connect(mongoUrl, { dbName: "quiltros" });
     console.log("DATABASE CONNECTED, APP STARTING");
     return dbClient;
   } catch (error) {
@@ -38,7 +38,7 @@ app.get("/", (req, res) => {
   return res.status(200).send();
 });
 
-app.use("/", amigosRouter);
+app.use("/", quiltrosRouter);
 app.use("/", eventsRouter);
 
 app.use("/s3", s3Router);
