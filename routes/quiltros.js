@@ -95,7 +95,7 @@ quiltrosRouter.post("/quiltros", async (req, res, next) => {
     await newQuiltro.save();
     const user = await User.findOne({ _id: userId });
     user.quiltroIds = !user.quiltroIds
-      ? [quiltroId]
+      ? [newQuiltro._id]
       : user.quiltroIds.slice().concat([quiltroId]);
     await user.save();
     return res.status(201).json(newQuiltro);
