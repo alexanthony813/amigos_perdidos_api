@@ -3,8 +3,24 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
 export const userSchema = new Schema({
-  phoneNumber: String,
   joinedOn: Date,
+  uid: String,
+  displayName: String,
+  accessToken: String,
+  providerId: String,
+  proactiveRefresh: Object,
+  reloadUserInfo: Object,
+  reloadListener: Object,
+  auth: Object,
+  stsTokenManager: Object,
+  email: String,
+  emailVerified: Boolean,
+  phoneNumber: String,
+  photoURL: String,
+  isAnonymous: Boolean,
+  tenantId: String,
+  providerData: Object,
+  metadata: Object,
 });
 
 export const User = model("User", userSchema);
