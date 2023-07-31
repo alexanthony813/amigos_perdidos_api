@@ -4,32 +4,18 @@ import { Quiltro, User } from "../models/index.js";
 import jwt from "jsonwebtoken";
 
 const quiltrosRouter = express.Router();
+
 quiltrosRouter.post("/users", async (req, res, next) => {
   try {
-    const { phoneNumber } = req.body; // password
-    // const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ phoneNumber, joinedOn: new Date() }); // , password: hashedPassword
+    const newUserJson = await req.body;
+    const { uid } = newUserJson;
+    const existingUser = await User.findOne({ uid });
+    if (existingUser) {
+      return res.status(422).send({ error: "User record exists." });
+    }
+    const user = new User({ ...newUserJson, joinedOn: new Date() });
     await user.save();
     return res.status(201).json(user);
-  } catch (err) {
-    return next(err);
-  }
-});
-
-quiltrosRouter.patch("/users/:userId", async (req, res, next) => {
-  try {
-    const { userId } = req.params;
-    const { expoPushToken } = req.body;
-    const user = await User.findOne({ userId });
-    if (!user) {
-      return res.status(400).send({ error: "Could not find user." });
-    }
-    if (!expoPushToken) {
-      return next(new Error("need valid expoPushToken"));
-    }
-    user.expoPushToken = expoPushToken;
-    await user.save();
-    return next(user);
   } catch (err) {
     return next(err);
   }
