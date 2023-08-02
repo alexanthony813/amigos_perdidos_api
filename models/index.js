@@ -42,7 +42,7 @@ const quiltroSchema = new Schema({
   photoUrl: String,
   requestedItems: String,
   lastStatusEvent: Object,
-  userId: Object, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
+  uid: Object, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
   // requested_items: '',
   // medical_issues: '',
   // medical_history: '',
