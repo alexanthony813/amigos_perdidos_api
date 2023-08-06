@@ -15,12 +15,14 @@ export const userSchema = new Schema({
   stsTokenManager: Object,
   email: String,
   emailVerified: Boolean,
-  phoneNumber: String,
+  phoneNumber: String, 
   photoURL: String,
-  isAnonymous: Boolean,
   tenantId: String,
   providerData: Object,
   metadata: Object,
+  isAnonymous: Boolean, // will determine whether can...?
+  isAdmin: Boolean,
+  lastLoginAt: String,
 });
 
 export const User = model("User", userSchema);

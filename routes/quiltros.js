@@ -2,8 +2,6 @@ import express from "express";
 import { Quiltro, User } from "../models/index.js";
 // import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-// todo wtf this import
-import * as mongoose from "mongoose";
 
 const quiltrosRouter = express.Router();
 
@@ -11,9 +9,12 @@ quiltrosRouter.post("/users", async (req, res, next) => {
   try {
     const newUserJson = await req.body;
     const { uid } = newUserJson;
+    newUserJson.isAdmin =
+      !newUserJson.isAnonymous && newUserJson.phoneNumber ? true : false;
     const existingUser = await User.findOne({ uid });
     if (existingUser) {
-      return res.status(409).json(existingUser);
+      // not going to throw 409 because of flow with anon auth this is streamlined
+      return res.status(201).json(existingUser);
     }
     const user = new User({ ...newUserJson, joinedOn: new Date() });
     await user.save();
@@ -80,7 +81,7 @@ quiltrosRouter.post("/quiltros", async (req, res, next) => {
     const newQuiltroJson = await req.body;
     const { uid } = newQuiltroJson;
     const newQuiltro = new Quiltro(newQuiltroJson);
-    newQuiltro.quiltroId = newQuiltro._id.toString()
+    newQuiltro.quiltroId = newQuiltro._id.toString();
     await newQuiltro.save();
     const user = await User.findOne({ uid });
     user.quiltroIds = !user.quiltroIds
