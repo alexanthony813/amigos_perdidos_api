@@ -2,6 +2,8 @@ import express from "express";
 import { Quiltro, User } from "../models/index.js";
 // import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+// todo wtf this import
+import * as mongoose from "mongoose";
 
 const quiltrosRouter = express.Router();
 
@@ -11,7 +13,7 @@ quiltrosRouter.post("/users", async (req, res, next) => {
     const { uid } = newUserJson;
     const existingUser = await User.findOne({ uid });
     if (existingUser) {
-      return res.status(409).json(user);
+      return res.status(409).json(existingUser);
     }
     const user = new User({ ...newUserJson, joinedOn: new Date() });
     await user.save();
@@ -78,10 +80,11 @@ quiltrosRouter.post("/quiltros", async (req, res, next) => {
     const newQuiltroJson = await req.body;
     const { uid } = newQuiltroJson;
     const newQuiltro = new Quiltro(newQuiltroJson);
+    newQuiltro.quiltroId = newQuiltro._id.toString()
     await newQuiltro.save();
     const user = await User.findOne({ uid });
     user.quiltroIds = !user.quiltroIds
-      ? [newQuiltro._id]
+      ? [newQuiltro.quiltroId]
       : user.quiltroIds.slice().concat([quiltroId]);
     await user.save();
     return res.status(201).json(newQuiltro);
@@ -122,7 +125,7 @@ quiltrosRouter.get("/quiltros/:quiltroId", async (req, res, next) => {
     return res.status(400).send();
   }
   try {
-    const quiltro = await Quiltro.findOne({ _id: quiltroId });
+    const quiltro = await Quiltro.findOne({ quiltroId });
     if (!quiltro) {
       return res.status(404).send();
     } else {

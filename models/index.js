@@ -43,6 +43,7 @@ const quiltroSchema = new Schema({
   requestedItems: String,
   lastStatusEvent: Object,
   uid: Object, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
+  quiltroId: String,
   // requested_items: '',
   // medical_issues: '',
   // medical_history: '',
@@ -52,3 +53,12 @@ const quiltroSchema = new Schema({
 });
 
 export const Quiltro = model("Quiltro", quiltroSchema);
+
+// TODO use postgres :)
+export const subscriberMapSchema = new Schema({
+  quiltroToUserMap: Object,
+  userToQuiltroMap: Object
+})
+
+export const SubscriberMap = model("SubscriberMap", subscriberMapSchema)
+
