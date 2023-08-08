@@ -1,7 +1,4 @@
-import {
-  StatusEvent,
-  Quiltro,
-} from "../models/index.js";
+import { StatusEvent, Quiltro } from "../models/index.js";
 import express from "express";
 
 const eventsRouter = express.Router();
@@ -37,7 +34,7 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
         .status(404)
         .send("quiltroId in body needs to match same in route");
     }
-    const quiltro = await Quiltro.findOne({ _id: quiltroId });
+    const quiltro = await Quiltro.findOne({ quiltroId });
     if (!quiltro) {
       return res.status(404).send("quiltro not found");
     }
