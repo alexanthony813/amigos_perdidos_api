@@ -1,5 +1,5 @@
 import express from "express";
-import { Quiltro, User } from "../models/index.js";
+import { Quiltro, User, RequestedItem } from "../models/index.js";
 // import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -39,6 +39,30 @@ quiltrosRouter.patch(
         : user.quiltroIds.slice().concat([quiltroId]);
       await user.save();
       return next(user);
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+quiltrosRouter.post(
+  "/quiltros/:quiltroId/requested-items",
+  async (req, res, next) => {
+    try {
+      const { quiltroId } = req.params;
+      const quiltro = await Quiltro.findOne({ quiltroId });
+      if (!quiltro) {
+        return res.status(404).send();
+      }
+      const requestedItemsJson = req.body;
+      const newRequestedItems = requestedItemsJson.map((item) => {
+        const newRequestedItem = new RequestedItem(item);
+        newRequestedItem.amountRaised = "0.00";
+        newRequestedItem.quiltroId = quiltroId
+        newRequestedItem.save();
+        return newRequestedItem;
+      });
+      return res.status(201).json(newRequestedItems);
     } catch (err) {
       return next(err);
     }
@@ -129,9 +153,10 @@ quiltrosRouter.get("/quiltros/:quiltroId", async (req, res, next) => {
     const quiltro = await Quiltro.findOne({ quiltroId });
     if (!quiltro) {
       return res.status(404).send();
-    } else {
-      return res.json(quiltro);
     }
+    const requestedItems = await RequestedItem.find({ quiltroId });
+    quiltro.requestedItems = requestedItems;
+    return res.json(quiltro);
   } catch (err) {
     return next(err);
   }
