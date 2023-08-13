@@ -23,6 +23,7 @@ export const userSchema = new Schema({
   isAnonymous: Boolean, // will determine whether can...?
   isAdmin: Boolean,
   lastLoginAt: String,
+  quiltroIds: Object,
 });
 
 export const User = model("User", userSchema);

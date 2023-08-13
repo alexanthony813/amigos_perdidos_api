@@ -24,13 +24,32 @@ quiltrosRouter.post("/users", async (req, res, next) => {
   }
 });
 
+
+quiltrosRouter.patch("/users/:uid", async (req, res, next) => {
+  try {
+    const { uid } = await req.params;
+    const updatedUserJson = await req.body;
+    const existingUser = await User.findOne({ uid });
+    if (!existingUser) {
+      // not going to throw 409 because of flow with anon auth this is streamlined
+      return res.status(404).send()
+    }
+
+    Object.assign(existingUser, updatedUserJson)
+    await existingUser.save();
+    return res.status(201).json(existingUser);
+  } catch (err) {
+    return next(err);
+  }
+});
+
 // subscribe user
 quiltrosRouter.patch(
-  "/users/:userId/quiltros/:quiltroId",
+  "/users/:uid/quiltros/:quiltroId",
   async (req, res, next) => {
     try {
-      const { userId, quiltroId } = req.params;
-      const user = await User.findOne({ userId });
+      const { uid, quiltroId } = req.params;
+      const user = await User.findOne({ uid });
       if (!user) {
         return res.status(400).send({ error: "Could not find user." });
       }
@@ -38,7 +57,7 @@ quiltrosRouter.patch(
         ? [quiltroId]
         : user.quiltroIds.slice().concat([quiltroId]);
       await user.save();
-      return next(user);
+      return res.status(200).json(user);
     } catch (err) {
       return next(err);
     }
