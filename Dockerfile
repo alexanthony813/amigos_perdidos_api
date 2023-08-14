@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY yarn.lock ./
-# RUN npm install -g migrate-mongo --force
+
 RUN npm install
 # RUN npm run build
 
