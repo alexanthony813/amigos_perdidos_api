@@ -4,25 +4,11 @@ import cors from "cors";
 import quiltrosRouter from "./routes/quiltros.js";
 import eventsRouter from "./routes/events.js";
 import s3Router from "./routes/s3.js";
-import mongoose from "mongoose";
 import functions from "firebase-functions";
 
 const PORT = 3000;
 
 export let dbClient;
-
-const connectDb = async () => {
-  try {
-    const mongoUrl = process.env.MONGO_DB_URL;
-    dbClient = await mongoose.connect(mongoUrl, { dbName: "quiltros" });
-    console.log("DATABASE CONNECTED, APP STARTING");
-    return dbClient;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-await connectDb();
 
 const app = express();
 
@@ -48,4 +34,4 @@ app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
 
-export const api = functions.https.onRequest(app);
+export const api = functions.region('southamerica-east1').https.onRequest(app);
