@@ -1,9 +1,23 @@
 import express from "express";
 import { Quiltro, User, RequestedItem } from "../models/index.js";
-// import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
 const quiltrosRouter = express.Router();
+
+const connectDb = async () => {
+  try {
+    const mongoUrl = process.env.MONGO_DB_URL;
+    dbClient = await mongoose.connect(mongoUrl, { dbName: "quiltros" });
+    console.log("DATABASE CONNECTED, APP STARTING");
+    return dbClient;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+await connectDb();
+
 
 quiltrosRouter.post("/users", async (req, res, next) => {
   try {
