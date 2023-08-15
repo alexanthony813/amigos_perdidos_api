@@ -5,6 +5,7 @@ import quiltrosRouter from "./routes/quiltros.js";
 import eventsRouter from "./routes/events.js";
 import s3Router from "./routes/s3.js";
 import mongoose from "mongoose";
+import functions from "firebase-functions";
 
 const PORT = 3000;
 
@@ -47,4 +48,4 @@ app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
 
-module.exports = app;
+export const api = functions.https.onRequest(app);

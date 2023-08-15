@@ -8,7 +8,8 @@
     "build": "",
     "postinstall": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "deploy": "firebase deploy --only functions"
   },
   "author": "Alexander Anthony",
   "license": "MIT",
@@ -20,6 +21,8 @@
     "dotenv": "^16.0.3",
     "expo-server-sdk": "^3.7.0",
     "express": "^4.18.2",
+    "firebase-admin": "^11.10.1",
+    "firebase-functions": "^4.4.1",
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.3",
@@ -30,5 +33,8 @@
   "devDependencies": {
     "migrate-mongo": "^8.1.4",
     "nodemon": "^2.0.22"
+  },
+  "engines": {
+    "node": "18"
   }
 }
