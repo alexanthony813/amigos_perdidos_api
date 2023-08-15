@@ -46,3 +46,5 @@ app.use("/s3", s3Router);
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
+
+module.exports = app;

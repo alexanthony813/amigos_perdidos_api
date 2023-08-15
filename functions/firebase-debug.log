@@ -1,0 +1,57 @@
+[debug] [2023-08-15T19:47:18.026Z] ----------------------------------------------------------------------
+[debug] [2023-08-15T19:47:18.029Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy
+[debug] [2023-08-15T19:47:18.029Z] CLI Version:   12.4.0
+[debug] [2023-08-15T19:47:18.030Z] Platform:      darwin
+[debug] [2023-08-15T19:47:18.030Z] Node Version:  v18.16.1
+[debug] [2023-08-15T19:47:18.038Z] Time:          Tue Aug 15 2023 15:47:18 GMT-0400 (Chile Standard Time)
+[debug] [2023-08-15T19:47:18.038Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-08-15T19:47:18.127Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-08-15T19:47:18.127Z] > authorizing via signed-in user (alexanderanthony813@gmail.com)
+[debug] [2023-08-15T19:47:18.127Z] [iam] checking project quiltro-637d7 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2023-08-15T19:47:18.130Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/quiltro-637d7:testIamPermissions [none]
+[debug] [2023-08-15T19:47:18.131Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/quiltro-637d7:testIamPermissions x-goog-quota-user=projects/quiltro-637d7
+[debug] [2023-08-15T19:47:18.131Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/quiltro-637d7:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2023-08-15T19:47:19.141Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/quiltro-637d7:testIamPermissions 200
+[debug] [2023-08-15T19:47:19.141Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/quiltro-637d7:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2023-08-15T19:47:19.141Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/quiltro-637d7/serviceAccounts/quiltro-637d7@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2023-08-15T19:47:19.142Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/quiltro-637d7/serviceAccounts/quiltro-637d7@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2023-08-15T19:47:20.135Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/quiltro-637d7/serviceAccounts/quiltro-637d7@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2023-08-15T19:47:20.135Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/quiltro-637d7/serviceAccounts/quiltro-637d7@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2023-08-15T19:47:20.136Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7 [none]
+[debug] [2023-08-15T19:47:20.567Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7 200
+[debug] [2023-08-15T19:47:20.567Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7 {"projectId":"quiltro-637d7","projectNumber":"410279620609","displayName":"quiltro-api","name":"projects/quiltro-637d7","resources":{"hostingSite":"quiltro-637d7"},"state":"ACTIVE","etag":"1_f50148a7-70d7-43fd-a04a-28d75ed7784b"}
+[info] 
+[info] === Deploying to 'quiltro-637d7'...
+[info] 
+[info] i  deploying functions, hosting 
+[debug] [2023-08-15T19:47:20.572Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7 [none]
+[debug] [2023-08-15T19:47:20.952Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7 200
+[debug] [2023-08-15T19:47:20.953Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7 {"projectId":"quiltro-637d7","projectNumber":"410279620609","displayName":"quiltro-api","name":"projects/quiltro-637d7","resources":{"hostingSite":"quiltro-637d7"},"state":"ACTIVE","etag":"1_f50148a7-70d7-43fd-a04a-28d75ed7784b"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2023-08-15T19:47:20.956Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/cloudfunctions.googleapis.com [none]
+[debug] [2023-08-15T19:47:20.956Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/quiltro-637d7
+[debug] [2023-08-15T19:47:20.957Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/runtimeconfig.googleapis.com [none]
+[debug] [2023-08-15T19:47:20.958Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/quiltro-637d7
+[debug] [2023-08-15T19:47:20.959Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/cloudbuild.googleapis.com [none]
+[debug] [2023-08-15T19:47:20.960Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/cloudbuild.googleapis.com x-goog-quota-user=projects/quiltro-637d7
+[debug] [2023-08-15T19:47:20.961Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/artifactregistry.googleapis.com [none]
+[debug] [2023-08-15T19:47:20.961Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/artifactregistry.googleapis.com x-goog-quota-user=projects/quiltro-637d7
+[debug] [2023-08-15T19:47:21.983Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/artifactregistry.googleapis.com 200
+[debug] [2023-08-15T19:47:21.983Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/artifactregistry.googleapis.com [omitted]
+[info] ✔  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2023-08-15T19:47:21.985Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/cloudfunctions.googleapis.com 200
+[debug] [2023-08-15T19:47:21.985Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/cloudfunctions.googleapis.com [omitted]
+[info] ✔  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2023-08-15T19:47:21.988Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/runtimeconfig.googleapis.com 200
+[debug] [2023-08-15T19:47:21.988Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2023-08-15T19:47:21.989Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/cloudbuild.googleapis.com 200
+[debug] [2023-08-15T19:47:21.989Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/quiltro-637d7/services/cloudbuild.googleapis.com [omitted]
+[info] ✔  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2023-08-15T19:47:21.989Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7/adminSdkConfig [none]
+[debug] [2023-08-15T19:47:22.386Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7/adminSdkConfig 200
+[debug] [2023-08-15T19:47:22.387Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/quiltro-637d7/adminSdkConfig {"projectId":"quiltro-637d7","storageBucket":"quiltro-637d7.appspot.com"}
+[debug] [2023-08-15T19:47:22.387Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/quiltro-637d7/configs [none]
