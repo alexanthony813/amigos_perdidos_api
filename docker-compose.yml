@@ -7,19 +7,7 @@ services:
       - "3000:3000"
     depends_on:
       - db
-    environment:
-      MONGO_DB_URL: mongodb://db/quiltros_api
-    volumes:
-      - quiltros_api:/data/db
     command:
       - npm start
-  db:
-    image: mongo:4.0.28-xenial
-    ports:
-      - "27017:27017"
-    environment:
-      - DB_URL=mongodb://db/quiltros_api
-    volumes:
-      - quiltros_api:/data/db
 volumes:
   quiltros_api:

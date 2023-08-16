@@ -1,9 +1,23 @@
 import express from "express";
 import { Quiltro, User, RequestedItem } from "../models/index.js";
-// import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
 const quiltrosRouter = express.Router();
+
+const connectDb = async () => {
+  try {
+    const mongoUrl = process.env.MONGO_DB_URL;
+    dbClient = await mongoose.connect(mongoUrl, { dbName: "quiltros" });
+    console.log("DATABASE CONNECTED, APP STARTING");
+    return dbClient;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+await connectDb();
+
 
 quiltrosRouter.post("/users", async (req, res, next) => {
   try {
@@ -24,7 +38,6 @@ quiltrosRouter.post("/users", async (req, res, next) => {
   }
 });
 
-
 quiltrosRouter.patch("/users/:uid", async (req, res, next) => {
   try {
     const { uid } = await req.params;
@@ -32,10 +45,10 @@ quiltrosRouter.patch("/users/:uid", async (req, res, next) => {
     const existingUser = await User.findOne({ uid });
     if (!existingUser) {
       // not going to throw 409 because of flow with anon auth this is streamlined
-      return res.status(404).send()
+      return res.status(404).send();
     }
 
-    Object.assign(existingUser, updatedUserJson)
+    Object.assign(existingUser, updatedUserJson);
     await existingUser.save();
     return res.status(201).json(existingUser);
   } catch (err) {
@@ -77,7 +90,7 @@ quiltrosRouter.post(
       const newRequestedItems = requestedItemsJson.map((item) => {
         const newRequestedItem = new RequestedItem(item);
         newRequestedItem.amountRaised = "0.00";
-        newRequestedItem.quiltroId = quiltroId
+        newRequestedItem.quiltroId = quiltroId;
         newRequestedItem.save();
         return newRequestedItem;
       });
