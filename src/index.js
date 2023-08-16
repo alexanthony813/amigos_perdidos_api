@@ -5,7 +5,7 @@ import quiltrosRouter from "./routes/quiltros.js";
 import eventsRouter from "./routes/events.js";
 import s3Router from "./routes/s3.js";
 import functions from "firebase-functions";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 import mongoose from "mongoose";
 
 const PORT = 3000;
@@ -51,4 +51,4 @@ app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
 
-export const api = functions.region('southamerica-east1').https.onRequest(app);
+export const api = functions.region("southamerica-east1").https.onRequest(app);

@@ -32,6 +32,7 @@ const statusEventSchema = new Schema({
   quiltroId: String,
   time: Date,
   location: String,
+  photo_url: String,
 });
 
 export const StatusEvent = model("StatusEvent", statusEventSchema);
@@ -45,7 +46,7 @@ const quiltroSchema = new Schema({
   photoUrl: String,
   requestedItems: String,
   lastStatusEvent: Object,
-  uid: Object, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
+  uid: String, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
   quiltroId: String,
   requestedItems: Object, // todo this is a hack you should fix it
   // medical_history: '',
