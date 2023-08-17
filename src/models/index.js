@@ -37,21 +37,21 @@ const statusEventSchema = new Schema({
 export const StatusEvent = model("StatusEvent", statusEventSchema);
 
 const quiltroSchema = new Schema({
+  quiltroId: String,
+  uid: Object, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
   name: String,
   age: String,
   favoriteFoods: String,
-  cannotOrWontEat: String,
+  allergies: String, // seems imoprtant but not sure how often it will be used
+  description: String,
   location: String,
   photoUrl: String,
-  requestedItems: String,
   lastStatusEvent: Object,
-  uid: Object, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
-  quiltroId: String,
-  requestedItems: Object, // todo this is a hack you should fix it
-  // medical_history: '',
+  isAdoptable: Boolean,
+  // requestedItems: Object, might come back
   // health_issues: '',
   // chip_id: '',
-  // nose_id: '',
+  // noseprint_id: '',
 });
 
 export const Quiltro = model("Quiltro", quiltroSchema);
@@ -66,11 +66,3 @@ const requestedItemSchema = new Schema({
 });
 
 export const RequestedItem = model("RequestedItem", requestedItemSchema);
-
-// TODO use postgres :)
-export const subscriberMapSchema = new Schema({
-  quiltroToUserMap: Object,
-  userToQuiltroMap: Object,
-});
-
-export const SubscriberMap = model("SubscriberMap", subscriberMapSchema);
