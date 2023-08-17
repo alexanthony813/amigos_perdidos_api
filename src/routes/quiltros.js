@@ -140,13 +140,15 @@ quiltrosRouter.get("/users/:uid/quiltros", async (req, res, next) => {
   if (!uid) {
     return res.status(400).send();
   }
+
   try {
-    const quiltros = await Quiltro.find({ uid });
-    if (!quiltros) {
+    const user = await User.findOne({ uid });
+    if (!user) {
       return res.status(404).send();
-    } else {
-      return res.json(quiltros.reverse());
     }
+    const { quiltroIds } = user;
+    const quiltros = await Quiltro.find({ quiltroId: { $in: quiltroIds } });
+    return res.json(quiltros.reverse());
   } catch (err) {
     return next(err);
   }
