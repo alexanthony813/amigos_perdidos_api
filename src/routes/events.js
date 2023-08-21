@@ -1,5 +1,10 @@
 import { StatusEvent, Quiltro } from "../models/index.js";
 import express from "express";
+import twilio from "twilio";
+const accountSid = "ACdfa7e2c0e0981f148a474e182201cbe1";
+const authToken = "";
+const client = twilio(accountSid, authToken);
+
 
 const eventsRouter = express.Router();
 
@@ -8,7 +13,7 @@ eventsRouter.get("/events", async (req, res) => {
     const statusEvents = await StatusEvent.find();
     return res.json(statusEvents.reverse());
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
@@ -18,11 +23,11 @@ eventsRouter.get("/quiltros/:quiltroId/events", async (req, res) => {
     const statusEvents = await StatusEvent.find({ quiltroId });
     return res.json(statusEvents.reverse());
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
-eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
+eventsRouter.post("/quiltros/:quiltroId/event", async (req, res) => {
   try {
     const { quiltroId } = req.params;
     const newStatusEventJson = await req.body;
@@ -45,9 +50,14 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
     quiltro.lastStatusEvent = newStatusEvent;
     quiltro.lastUpdatedAt = now;
     await quiltro.save();
+    client.messages.create({
+      body: `Se informó un problema sobre ${quiltro.name}, foto aqui ${newStatusEvent}`,
+      from: "whatsapp:+14155238886",
+      to: "whatsapp:+17868349832",
+    });
     return res.status(201).json(newStatusEvent);
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 

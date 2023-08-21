@@ -1,10 +1,9 @@
 import express from "express";
 import { Quiltro, User, RequestedItem } from "../models/index.js";
-import jwt from "jsonwebtoken";
 
 const quiltrosRouter = express.Router();
 
-quiltrosRouter.post("/users", async (req, res, next) => {
+quiltrosRouter.post("/users", async (req, res) => {
   try {
     const newUserJson = await req.body;
     const { uid } = newUserJson;
@@ -19,11 +18,11 @@ quiltrosRouter.post("/users", async (req, res, next) => {
     await user.save();
     return res.status(201).json(user);
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
-quiltrosRouter.patch("/users/:uid", async (req, res, next) => {
+quiltrosRouter.patch("/users/:uid", async (req, res) => {
   try {
     const { uid } = await req.params;
     const updatedUserJson = await req.body;
@@ -37,34 +36,31 @@ quiltrosRouter.patch("/users/:uid", async (req, res, next) => {
     await existingUser.save();
     return res.status(201).json(existingUser);
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
 // subscribe user
-quiltrosRouter.patch(
-  "/users/:uid/quiltros/:quiltroId",
-  async (req, res, next) => {
-    try {
-      const { uid, quiltroId } = req.params;
-      const user = await User.findOne({ uid });
-      if (!user) {
-        return res.status(400).send({ error: "Could not find user." });
-      }
-      user.quiltroIds = !user.quiltroIds
-        ? [quiltroId]
-        : user.quiltroIds.slice().concat([quiltroId]);
-      await user.save();
-      return res.status(200).json(user);
-    } catch (err) {
-      return next(err);
+quiltrosRouter.patch("/users/:uid/quiltros/:quiltroId", async (req, res) => {
+  try {
+    const { uid, quiltroId } = req.params;
+    const user = await User.findOne({ uid });
+    if (!user) {
+      return res.status(400).send({ error: "Could not find user." });
     }
+    user.quiltroIds = !user.quiltroIds
+      ? [quiltroId]
+      : user.quiltroIds.slice().concat([quiltroId]);
+    await user.save();
+    return res.status(200).json(user);
+  } catch (err) {
+    return res.status(500).json(err);
   }
-);
+});
 
 quiltrosRouter.post(
   "/quiltros/:quiltroId/requested-items",
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       const { quiltroId } = req.params;
       const quiltro = await Quiltro.findOne({ quiltroId });
@@ -81,43 +77,21 @@ quiltrosRouter.post(
       });
       return res.status(201).json(newRequestedItems);
     } catch (err) {
-      return next(err);
+      return res.status(500).json(err);
     }
   }
 );
-
-quiltrosRouter.post("/auth", async (req, res, next) => {
-  try {
-    const { phoneNumber } = req.body;
-    const user = await User.findOne({ phoneNumber });
-    if (!user) {
-      return next(new Error("Could not find the phone number."));
-    }
-    // const passwordMatch = await bcrypt.compare(password, user.password);
-    // if (!passwordMatch) {
-    //   return res.status(400).send({ error: "Invalid username or password." });
-    // }
-
-    const token = jwt.sign(
-      { userId: user.uid, phoneNumber },
-      process.env.JWT_PRIVATE_KEY
-    );
-    return res.status(201).json(token);
-  } catch (err) {
-    return next(err);
-  }
-});
 
 quiltrosRouter.get("/users", async (req, res) => {
   try {
     const users = await User.find();
     return res.json(users);
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
-quiltrosRouter.post("/quiltros", async (req, res, next) => {
+quiltrosRouter.post("/quiltros", async (req, res) => {
   try {
     const newQuiltroJson = await req.body;
     const { uid } = newQuiltroJson;
@@ -131,11 +105,11 @@ quiltrosRouter.post("/quiltros", async (req, res, next) => {
     await user.save();
     return res.status(201).json(newQuiltro);
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
-quiltrosRouter.get("/users/:uid/quiltros", async (req, res, next) => {
+quiltrosRouter.get("/users/:uid/quiltros", async (req, res) => {
   const { uid } = req.params;
   if (!uid) {
     return res.status(400).send();
@@ -150,20 +124,20 @@ quiltrosRouter.get("/users/:uid/quiltros", async (req, res, next) => {
     const quiltros = await Quiltro.find({ quiltroId: { $in: quiltroIds } });
     return res.json(quiltros.reverse());
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
-quiltrosRouter.get("/quiltros", async (req, res, next) => {
+quiltrosRouter.get("/quiltros", async (req, res) => {
   try {
     const quiltros = await Quiltro.find();
     return res.json(quiltros.reverse());
   } catch (err) {
-    next(err);
+    res.status(500).json(err);
   }
 });
 
-quiltrosRouter.get("/quiltros/:quiltroId", async (req, res, next) => {
+quiltrosRouter.get("/quiltros/:quiltroId", async (req, res) => {
   const { quiltroId } = req.params;
   if (!quiltroId) {
     return res.status(400).send();
@@ -177,7 +151,7 @@ quiltrosRouter.get("/quiltros/:quiltroId", async (req, res, next) => {
     quiltro.requestedItems = requestedItems;
     return res.json(quiltro);
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
