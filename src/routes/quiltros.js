@@ -2,6 +2,9 @@ import express from "express";
 import { Quiltro, User, RequestedItem } from "../models/index.js";
 
 const quiltrosRouter = express.Router();
+quiltrosRouter.get("/testdeploy", async (req, res) => {
+  res.status(200).json({});
+});
 
 quiltrosRouter.post("/users", async (req, res) => {
   try {

@@ -32,6 +32,8 @@ const statusEventSchema = new Schema({
   quiltroId: String,
   time: Date,
   location: String,
+  photoUrl: String,
+  details: Object
 });
 
 export const StatusEvent = model("StatusEvent", statusEventSchema);

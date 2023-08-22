@@ -1,10 +1,6 @@
-import { StatusEvent, Quiltro } from "../models/index.js";
+import { StatusEvent, Quiltro, User } from "../models/index.js";
 import express from "express";
-import twilio from "twilio";
-const accountSid = "ACdfa7e2c0e0981f148a474e182201cbe1";
-const authToken = "";
-const client = twilio(accountSid, authToken);
-
+import { twilioClient, twilioPhoneNUmber } from "../index.js"
 
 const eventsRouter = express.Router();
 
@@ -50,15 +46,27 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res) => {
     quiltro.lastStatusEvent = newStatusEvent;
     quiltro.lastUpdatedAt = now;
     await quiltro.save();
-    client.messages.create({
-      body: `Se informó un problema sobre ${quiltro.name}, foto aqui ${newStatusEvent}`,
-      from: "whatsapp:+14155238886",
-      to: "whatsapp:+17868349832",
-    });
-    return res.status(201).json(newStatusEvent);
+    const body = `Se informó un problema con ${quiltro.name}! \n Foto aquí: ${newStatusEvent.photoUrl} \n Mensaje del denunciante:${newStatusEvent.details.body}`;
+    const { uid } = quiltro;
+    const user = await User.findOne({ uid });
+    const { phoneNumber } = user;
+    twilioClient.messages
+      .create({
+        body,
+        from: `whatsapp:${twilioPhoneNUmber}`,
+        to: `whatsapp:${phoneNumber}`,
+      })
+      .then((value) => {
+        return res.status(201).json(newStatusEvent);
+      })
+      .catch((error) => {
+        console.error(error);
+        return res.status(500).json(error);
+      });
   } catch (err) {
     return res.status(500).json(err);
   }
 });
+
 
 export default eventsRouter;
