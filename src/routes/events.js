@@ -1,5 +1,6 @@
-import { StatusEvent, Quiltro } from "../models/index.js";
+import { StatusEvent, Quiltro, User } from "../models/index.js";
 import express from "express";
+import { twilioClient, twilioPhoneNUmber } from "../index.js"
 
 const eventsRouter = express.Router();
 
@@ -8,7 +9,7 @@ eventsRouter.get("/events", async (req, res) => {
     const statusEvents = await StatusEvent.find();
     return res.json(statusEvents.reverse());
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
@@ -18,11 +19,11 @@ eventsRouter.get("/quiltros/:quiltroId/events", async (req, res) => {
     const statusEvents = await StatusEvent.find({ quiltroId });
     return res.json(statusEvents.reverse());
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
 
-eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
+eventsRouter.post("/quiltros/:quiltroId/event", async (req, res) => {
   try {
     const { quiltroId } = req.params;
     const newStatusEventJson = await req.body;
@@ -45,10 +46,27 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
     quiltro.lastStatusEvent = newStatusEvent;
     quiltro.lastUpdatedAt = now;
     await quiltro.save();
-    return res.status(201).json(newStatusEvent);
+    const body = `Se informó un problema con ${quiltro.name}! \n Foto aquí: ${newStatusEvent.photoUrl} \n Mensaje del denunciante:${newStatusEvent.details.body}`;
+    const { uid } = quiltro;
+    const user = await User.findOne({ uid });
+    const { phoneNumber } = user;
+    twilioClient.messages
+      .create({
+        body,
+        from: `whatsapp:${twilioPhoneNUmber}`,
+        to: `whatsapp:${phoneNumber}`,
+      })
+      .then((value) => {
+        return res.status(201).json(newStatusEvent);
+      })
+      .catch((error) => {
+        console.error(error);
+        return res.status(500).json(error);
+      });
   } catch (err) {
-    return next(err);
+    return res.status(500).json(err);
   }
 });
+
 
 export default eventsRouter;
