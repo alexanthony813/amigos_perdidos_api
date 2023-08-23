@@ -1,9 +1,55 @@
 import express from "express";
 import { Quiltro, User, RequestedItem } from "../models/index.js";
+import PDFDocument from "pdfkit";
+import { s3, bucketName } from "../index.js";
+import fs from "fs";
 
 const quiltrosRouter = express.Router();
-quiltrosRouter.get("/testdeploy", async (req, res) => {
-  res.status(200).json({});
+const appUrl = "https://quiltro-44098.web.app";
+
+// this should prob be it's own router before merge
+const generatePDF = (fileName) => {
+  // Create a document
+  const doc = new PDFDocument();
+
+  // Pipe it's output somewhere, like to a file or HTTP response
+  doc.pipe(fs.createWriteStream("output.pdf"));
+  doc.text("Whatever content goes here");
+  doc.end();
+  var params = {
+    Key: fileName,
+    Body: doc,
+    Bucket: bucketName,
+    ContentType: "application/pdf",
+  };
+  console.dir(s3)
+  s3.upload(params, function (err, response) {
+    console.dir(response)
+  });
+};
+
+quiltrosRouter.get("/quiltros/:quiltroId/pdf", async (req, res) => {
+  try {
+    const { quiltroId } = req.params;
+    const fullQRCodeUrl = `${appUrl}/${quiltroId}`;
+    let pdf = await generatePDF(`${quiltroId}.pdf`);
+    //   var qrcode = QRCode.to("qrcode", {
+    //     text: fullQRCodeUrl,
+    //     width: 200,
+    //     height: 200,
+    //     colorDark : "#000000",
+    //     colorLight : "#ffffff",
+    //     // correctLevel : QRCode.CorrectLevel.H
+    // });
+    res.status(201).json(pdf);
+  } catch (err) {
+    console.dir(err);
+    res.status(500).json(err);
+  }
+});
+
+quiltrosRouter.post("/twilio-webhook", async (req, res) => {
+  console.log("dirrr");
 });
 
 quiltrosRouter.post("/users", async (req, res) => {

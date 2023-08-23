@@ -8,6 +8,7 @@ import functions from "firebase-functions";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import twilio from "twilio";
+import aws from "aws-sdk";
 
 const PORT = 3000;
 
@@ -16,6 +17,8 @@ dotenv.config();
 export let dbClient;
 export let twilioClient;
 export let twilioPhoneNumber;
+export let s3;
+export const bucketName = "amigosperdidos";
 
 const connectDb = async () => {
   try {
@@ -40,8 +43,23 @@ const connectTwilio = async () => {
   }
 };
 
+const connectS3 = async () => {
+  try {
+    s3 = new aws.S3({
+      region: "sa-east-1",
+      bucketName,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      signatureVersion: "v4",
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 connectDb();
 connectTwilio();
+connectS3();
 
 const app = express();
 
