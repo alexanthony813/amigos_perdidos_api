@@ -3,36 +3,73 @@ import { Quiltro, User, RequestedItem } from "../models/index.js";
 import PDFDocument from "pdfkit";
 import { s3, bucketName } from "../index.js";
 import fs from "fs";
+import fetch from 'node-fetch'
 
 const quiltrosRouter = express.Router();
 const appUrl = "https://quiltro-44098.web.app";
 
 // this should prob be it's own router before merge
-const generatePDF = (fileName) => {
+const generatePDF = () => {
   // Create a document
   const doc = new PDFDocument();
 
   // Pipe it's output somewhere, like to a file or HTTP response
   doc.pipe(fs.createWriteStream("output.pdf"));
   doc.text("Whatever content goes here");
-  doc.end();
-  var params = {
-    Key: fileName,
-    Body: doc,
-    Bucket: bucketName,
-    ContentType: "application/pdf",
-  };
-  console.dir(s3)
-  s3.upload(params, function (err, response) {
-    console.dir(response)
-  });
+  console.dir(s3);
+  return doc
 };
 
 quiltrosRouter.get("/quiltros/:quiltroId/pdf", async (req, res) => {
   try {
     const { quiltroId } = req.params;
-    const fullQRCodeUrl = `${appUrl}/${quiltroId}`;
-    let pdf = await generatePDF(`${quiltroId}.pdf`);
+    const quiltro = await Quiltro.findOne({ quiltroId });
+    if (!quiltro) {
+      return res.status(404).send();
+    }
+    const url = quiltro.photoUrl;
+    let pdf = await generatePDF();
+
+    const imageParams = {
+      Key: "222991e199944b316717886fffa4f65e.jpg",
+      Bucket: bucketName
+    }
+    const data = await s3.getObject(imageParams).promise() // TODO use this everywhere!!
+    const img = Buffer.from(data.Body)
+    pdf.image(img, 100, 100);
+    // res.end(null, "binary");
+    pdf.end()
+    s3.getObject(imageParams, function (err, data) {
+      // res.writeHead(200, { "Content-Type": "image/jpeg" });
+      // pdf.addContent(data.Body, "base64");
+      // pdf.image(data.Body.buffer.toString('base64'));
+
+
+      var uploadParams = {
+        Key: `${quiltroId}.pdf`,
+        Body: pdf,
+        Bucket: bucketName,
+        ContentType: "application/pdf",
+      };
+      s3.upload(uploadParams, function (err, response) {
+        console.dir(response);
+      });
+    });
+    // const rawBase64 = imageUpload.base64
+    // var buffer = Buffer.from(
+    //   rawBase64.replace(/^data:image\/\w+;base64,/, ''),
+    //   'base64'
+    // )
+    // const s3Result = await fetch(presignedUrl, {
+    //   method: 'PUT',
+    //   headers: {
+    //     'Content-Type': 'image/jpeg',
+    //     'Access-Control-Allow-Origin': '*',
+    //     'Content-Encoding': 'base64',
+    //   },
+    //   body: buffer,
+    // })
+
     //   var qrcode = QRCode.to("qrcode", {
     //     text: fullQRCodeUrl,
     //     width: 200,

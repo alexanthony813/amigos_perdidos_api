@@ -50,9 +50,11 @@ const quiltroSchema = new Schema({
   description: String,
   location: String,
   photoUrl: String,
+  photoKey: String,
   lastReportedProblem: Object,
   isAdoptable: Boolean,
   flyerUrl: String,
+  flyerKey: String
   // requestedItems: Object, might come back
   // health_issues: '',
   // chip_id: '',
