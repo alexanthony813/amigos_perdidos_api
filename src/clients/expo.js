@@ -14,7 +14,7 @@ class ExpoClient {
           "accept-encoding": "gzip, deflate",
           "content-type": "application/json",
         },
-        body: JSON.stringify([expo_message]), // TODO and below make array compatible before merge plzzzz
+        body: JSON.stringify([expo_message]),
       }
     );
     const expoResponse = await expoMessageRequest.json();

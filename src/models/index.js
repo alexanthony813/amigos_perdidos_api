@@ -28,12 +28,14 @@ export const userSchema = new Schema({
 
 export const User = model("User", userSchema);
 
+export const statusEventStatuses = ["problem_denied", "problem_reported"];
+
 const statusEventSchema = new Schema({
   quiltroId: String,
   time: Date,
-  location: String,
+  status: String,
   photoUrl: String,
-  details: Object
+  details: Object,
 });
 
 export const StatusEvent = model("StatusEvent", statusEventSchema);
@@ -48,7 +50,7 @@ const quiltroSchema = new Schema({
   description: String,
   location: String,
   photoUrl: String,
-  lastStatusEvent: Object,
+  lastReportedProblem: Object,
   isAdoptable: Boolean,
   // requestedItems: Object, might come back
   // health_issues: '',

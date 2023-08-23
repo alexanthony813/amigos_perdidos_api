@@ -102,9 +102,9 @@ quiltrosRouter.post("/quiltros", async (req, res) => {
     newQuiltro.quiltroId = newQuiltro._id.toString();
     await newQuiltro.save();
     const user = await User.findOne({ uid });
-    user.quiltroIds = !user.quiltroIds
+    user.quiltroIds = !user.quiltroIds // TODO LET's USE POSTGRES THIS IS TOO MUCH, need join table
       ? [newQuiltro.quiltroId]
-      : user.quiltroIds.slice().concat([quiltroId]);
+      : user.quiltroIds.slice().concat([newQuiltro.quiltroId]);
     await user.save();
     return res.status(201).json(newQuiltro);
   } catch (err) {

@@ -15,7 +15,7 @@ dotenv.config();
 
 export let dbClient;
 export let twilioClient;
-export let twilioPhoneNUmber;
+export let twilioPhoneNumber;
 
 const connectDb = async () => {
   try {
@@ -33,7 +33,7 @@ const connectTwilio = async () => {
       process.env.TWILIO_ACCOUNT_SID,
       process.env.TWILIO_AUTH_TOKEN
     );
-    twilioPhoneNUmber = process.env.TWILIO_PHONE_NUMBER;
+    twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
     console.log("TWILIO CONNECTED");
   } catch (error) {
     console.error(error);
