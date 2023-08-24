@@ -4,30 +4,44 @@
     <title>HTML content</title>
   </head>
   <body>
-    <p
-      id="quiltroName"
+    <div>
+      <p
+        id="quiltroName"
+        style="
+          margin-top: 0;
+          text-align: center;
+          font-size: 4em;
+          font-weight: bold;
+          margin-bottom: 0;
+        "
+      ></p>
+    </div>
+    <div
       style="
-        margin-top: 0.25em;
-        text-align: center;
-        font-size: 7em;
-        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        margin-top: 0;
         margin-bottom: 0;
-      "
-    ></p>
-    <p
-      style="
-        margin-top: 0.25em;
-        text-align: center;
-        font-size: 5em;
-        font-weight: bold;
-        margin-bottom: 0;
+        align-items: center;
       "
     >
-      Quieres ayudarme? Ves un problema? ¡Escanea el codigo QR porfa! 🙏
-    </p>
-    <div>
-      <img id="profileImage" />
+      <div>
+        <img id="profileImage" height="400" width="400" />
+      </div>
+      <div id="qrcode-container"></div>
     </div>
-    <div></div>
+
+    <div style="display: flex; align-items: center; font-size: 3em">
+      <p
+        style="
+          margin-top: 0;
+          text-align: center;
+          font-weight: bold;
+          margin-bottom: 0;
+        "
+      >
+        ¿Quisieras ayudarme? ¡Escanea el codigo QR porfa!
+      </p>
+    </div>
   </body>
 </html>

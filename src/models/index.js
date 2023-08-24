@@ -52,7 +52,6 @@ const quiltroSchema = new Schema({
   photoUrl: String,
   lastReportedProblem: Object,
   isAdoptable: Boolean,
-  // flyerUrl: String,
   // requestedItems: Object, might come back
   // health_issues: '',
   // chip_id: '',

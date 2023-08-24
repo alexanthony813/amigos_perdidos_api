@@ -3,23 +3,21 @@ import { Quiltro, User, RequestedItem } from "../models/index.js";
 import PDFDocument from "pdfkit";
 import { s3, bucketName } from "../index.js";
 import fs from "fs";
-import fetch from "node-fetch";
+import path from "path";
 import puppeteer from "puppeteer";
+import QRCode from "qrcode";
 
 const quiltrosRouter = express.Router();
 const appUrl = "https://quiltro-44098.web.app";
-
-// this should prob be it's own router before merge
-const generatePDF = () => {
-  // Create a document
-  const doc = new PDFDocument();
-
-  // Pipe it's output somewhere, like to a file or HTTP response
-  doc.pipe(fs.createWriteStream("output.pdf"));
-  doc.text("Whatever content goes here");
-  console.dir(s3);
-  return doc;
-};
+async function generateQRCodeDataUrl(qrData) {
+  try {
+    const qrDataURL = await QRCode.toDataURL(qrData);
+    return qrDataURL;
+  } catch (error) {
+    console.error("Error generating QR code:", error);
+    throw error;
+  }
+}
 
 quiltrosRouter.get("/quiltros/:quiltroId/flyer", async (req, res) => {
   try {
@@ -28,70 +26,55 @@ quiltrosRouter.get("/quiltros/:quiltroId/flyer", async (req, res) => {
     if (!quiltro) {
       return res.status(404).send();
     }
-    const url = quiltro.photoUrl;
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
+    const currentDirectory = process.cwd();
+    const relativePath = "/routes/sample.html";
+
     const html = fs.readFileSync(
-      "/Users/alexanderanthony/Projects/amigos_perdidos_api/src/routes/sample.html",
+      path.join(currentDirectory, relativePath),
       "utf-8"
     );
     await page.setContent(html, { waitUntil: "domcontentloaded" });
-
+    const qrDataURL = await generateQRCodeDataUrl(
+      `${appUrl}/${quiltro.quiltroId}`
+    );
     await page.evaluate(
-      ({ quiltro }) => {
+      ({ quiltro, qrDataURL }) => {
         document.getElementById(
           "quiltroName"
         ).innerHTML = `¡Hola! Soy ${quiltro.name}`;
-        // document
-        //   .getElementById("profileImage").src = "https://amigosperdidos.s3.sa-east-1.amazonaws.com/4698e05d910612e2e9f7cc02b3bc1ab0.jpg"
-        //   .setAttribute(
-        //     "src",
-        //   );
+        const imgElement = document.querySelector("#profileImage");
+        if (imgElement) {
+          imgElement.src = quiltro.photoUrl;
+        }
+        const qrcodeContainer = document.querySelector("#qrcode-container");
+        const qrImage = document.createElement("img");
+        qrImage.src = qrDataURL;
+        qrImage.height = 300;
+        qrImage.width = 300;
+        qrcodeContainer.appendChild(qrImage);
       },
-      { quiltro }
+      { quiltro, qrDataURL }
     );
-    const imgSelector = '#profileImage'; // Replace with your actual ID
-    const newImageUrl = "https://amigosperdidos.s3.sa-east-1.amazonaws.com/4698e05d910612e2e9f7cc02b3bc1ab0.jpg"
-    await page.evaluate((selector, url) => {
-      const imgElement = document.querySelector(selector);
-      if (imgElement) {
-        // const newImg = new Image();
-        // newImg.src = url;
-        imgElement.src = url
-        // imgElement.parentNode.replaceChild(newImg, imgElement);
-      }
-    }, imgSelector, newImageUrl);
-    await page.waitForSelector(`[src="${newImageUrl}"]`);
 
+    await page.waitForSelector(`[src="${quiltro.photoUrl}"]`);
+    await page.waitForTimeout(5000); // this is so annoying but no clean wait for image loaded
     const pdf = await page.pdf({
-      path: "result.pdf",
+      path: "./result.pdf",
       margin: { top: "100px", right: "50px", bottom: "100px", left: "50px" },
       printBackground: true,
       format: "A4",
     });
     await page.close();
-
-    // await page.emulateMediaType("screen");
-    // await page.$eval("p", (e) => {
-    //   e.innerHtml = `¡Hola! Soy Rza`;
-    // });
-    // await page.$eval('img', (e) => {
-    //   e.setAttribute("src", quiltro.photoUrl);
-    // })
-    // Close the browser instance
-    // res.setHeader("Content-Type", "application/pdf");
-    // res.setHeader("Content-Disposition", "attachment; filename=quote.pdf");
-    // pdf.pipe(res);
-    console.dir(pdf);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename=result.pdf');
+    res.send(pdf);
   } catch (err) {
     console.dir(err);
     res.status(500).json(err);
   }
-});
-
-quiltrosRouter.post("/twilio-webhook", async (req, res) => {
-  console.log("dirrr");
 });
 
 quiltrosRouter.post("/users", async (req, res) => {
@@ -247,71 +230,3 @@ quiltrosRouter.get("/quiltros/:quiltroId", async (req, res) => {
 });
 
 export default quiltrosRouter;
-
-quiltrosRouter.get("/quiltros/:quiltroId/pdf", async (req, res) => {
-  try {
-    const { quiltroId } = req.params;
-    const quiltro = await Quiltro.findOne({ quiltroId });
-    if (!quiltro) {
-      return res.status(404).send();
-    }
-    const url = quiltro.photoUrl;
-    let pdf = await generatePDF();
-
-    const imageParams = {
-      Key: "222991e199944b316717886fffa4f65e.jpg",
-      Bucket: bucketName,
-    };
-    const data = await s3.getObject(imageParams).promise(); // TODO use this everywhere!!
-    // pdf.pipe(fs.createWriteStream('MyPDFDoc.pdf'));
-    // const img = Buffer.from(data.Body.buffer, 'base64')
-    let fimg = await fetch(url);
-    let fimgb = Buffer.from(await fimg.arrayBuffer());
-    const img = Buffer.from(data.Body);
-    pdf.image(img, 100, 100);
-    // res.end(null, "binary");
-    pdf.end();
-    s3.getObject(imageParams, function (err, data) {
-      // res.writeHead(200, { "Content-Type": "image/jpeg" });
-      // pdf.addContent(data.Body, "base64");
-      // pdf.image(data.Body.buffer.toString('base64'));
-
-      var uploadParams = {
-        Key: `${quiltroId}.pdf`,
-        Body: pdf,
-        Bucket: bucketName,
-        ContentType: "application/pdf",
-      };
-      s3.upload(uploadParams, function (err, response) {
-        console.dir(response);
-      });
-    });
-    // const rawBase64 = imageUpload.base64
-    // var buffer = Buffer.from(
-    //   rawBase64.replace(/^data:image\/\w+;base64,/, ''),
-    //   'base64'
-    // )
-    // const s3Result = await fetch(presignedUrl, {
-    //   method: 'PUT',
-    //   headers: {
-    //     'Content-Type': 'image/jpeg',
-    //     'Access-Control-Allow-Origin': '*',
-    //     'Content-Encoding': 'base64',
-    //   },
-    //   body: buffer,
-    // })
-
-    //   var qrcode = QRCode.to("qrcode", {
-    //     text: fullQRCodeUrl,
-    //     width: 200,
-    //     height: 200,
-    //     colorDark : "#000000",
-    //     colorLight : "#ffffff",
-    //     // correctLevel : QRCode.CorrectLevel.H
-    // });
-    res.status(201).json(pdf);
-  } catch (err) {
-    console.dir(err);
-    res.status(500).json(err);
-  }
-});
