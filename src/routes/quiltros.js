@@ -3,7 +3,8 @@ import { Quiltro, User, RequestedItem } from "../models/index.js";
 import PDFDocument from "pdfkit";
 import { s3, bucketName } from "../index.js";
 import fs from "fs";
-import fetch from 'node-fetch'
+import fetch from "node-fetch";
+import puppeteer from "puppeteer";
 
 const quiltrosRouter = express.Router();
 const appUrl = "https://quiltro-44098.web.app";
@@ -17,8 +18,51 @@ const generatePDF = () => {
   doc.pipe(fs.createWriteStream("output.pdf"));
   doc.text("Whatever content goes here");
   console.dir(s3);
-  return doc
+  return doc;
 };
+
+quiltrosRouter.get("/quiltros/:quiltroId/flyer", async (req, res) => {
+  try {
+    const { quiltroId } = req.params;
+    const quiltro = await Quiltro.findOne({ quiltroId });
+    if (!quiltro) {
+      return res.status(404).send();
+    }
+    const url = quiltro.photoUrl;
+    const browser = await puppeteer.launch();
+
+    // Create a new page
+    const page = await browser.newPage();
+
+    //Get HTML content from HTML file
+    const html = fs.readFileSync(
+      "/Users/alexanderanthony/Projects/amigos_perdidos_api/src/routes/sample.html",
+      "utf-8"
+    );
+    await page.setContent(html, { waitUntil: "domcontentloaded" });
+    await page.emulateMediaType("screen");
+    await page.evaluate(() => {
+      let image = document.querySelector("#profileImage");
+      image.setAttribute("src", quiltro.photoUrl);
+   });
+    // Downlaod the PDF
+    const pdf = await page.pdf({
+      path: "result.pdf",
+      margin: { top: "100px", right: "50px", bottom: "100px", left: "50px" },
+      printBackground: true,
+      format: "A4",
+    });
+
+    // Close the browser instance
+    await browser.close();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=quote.pdf");
+    pdf.pipe(res);
+  } catch (err) {
+    console.dir(err);
+    res.status(500).json(err);
+  }
+});
 
 quiltrosRouter.get("/quiltros/:quiltroId/pdf", async (req, res) => {
   try {
@@ -32,18 +76,21 @@ quiltrosRouter.get("/quiltros/:quiltroId/pdf", async (req, res) => {
 
     const imageParams = {
       Key: "222991e199944b316717886fffa4f65e.jpg",
-      Bucket: bucketName
-    }
-    const data = await s3.getObject(imageParams).promise() // TODO use this everywhere!!
-    const img = Buffer.from(data.Body)
+      Bucket: bucketName,
+    };
+    const data = await s3.getObject(imageParams).promise(); // TODO use this everywhere!!
+    // pdf.pipe(fs.createWriteStream('MyPDFDoc.pdf'));
+    // const img = Buffer.from(data.Body.buffer, 'base64')
+    let fimg = await fetch(url);
+    let fimgb = Buffer.from(await fimg.arrayBuffer());
+    const img = Buffer.from(data.Body);
     pdf.image(img, 100, 100);
     // res.end(null, "binary");
-    pdf.end()
+    pdf.end();
     s3.getObject(imageParams, function (err, data) {
       // res.writeHead(200, { "Content-Type": "image/jpeg" });
       // pdf.addContent(data.Body, "base64");
       // pdf.image(data.Body.buffer.toString('base64'));
-
 
       var uploadParams = {
         Key: `${quiltroId}.pdf`,
