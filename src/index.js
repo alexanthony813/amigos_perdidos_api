@@ -85,4 +85,7 @@ app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
 
-export const api = functions.region("southamerica-east1").https.onRequest(app);
+export const api = functions
+  .runWith({ memory: "512MB" })
+  .region("southamerica-east1")
+  .https.onRequest(app);
