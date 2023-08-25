@@ -1,7 +1,5 @@
 import express from "express";
 import { Quiltro, User, RequestedItem } from "../models/index.js";
-import PDFDocument from "pdfkit";
-import { s3, bucketName } from "../index.js";
 import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
@@ -19,23 +17,18 @@ async function generateQRCodeDataUrl(qrData) {
   }
 }
 
-quiltrosRouter.get("/quiltros/:quiltroId/flyer", async (req, res) => {
+quiltrosRouter.get("/quiltros/:quiltroId/flyer", async (req, res, next) => {
   try {
     const { quiltroId } = req.params;
     const quiltro = await Quiltro.findOne({ quiltroId });
     if (!quiltro) {
       return res.status(404).send();
     }
-
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    const currentDirectory = process.cwd();
-    const relativePath = "/routes/sample.html";
-
-    const html = fs.readFileSync(
-      path.join(currentDirectory, relativePath),
-      "utf-8"
-    );
+    const relativePath = "./routes/sample.html";
+    const fullPath = path.resolve(relativePath);
+    const html = fs.readFileSync(fullPath, "utf-8");
     await page.setContent(html, { waitUntil: "domcontentloaded" });
     const qrDataURL = await generateQRCodeDataUrl(
       `${appUrl}/${quiltro.quiltroId}`
@@ -58,26 +51,23 @@ quiltrosRouter.get("/quiltros/:quiltroId/flyer", async (req, res) => {
       },
       { quiltro, qrDataURL }
     );
-
     await page.waitForSelector(`[src="${quiltro.photoUrl}"]`);
-    await page.waitForTimeout(5000); // this is so annoying but no clean wait for image loaded
+    await page.waitForTimeout(3000); // this is so annoying but no clean wait for image loaded
     const pdf = await page.pdf({
-      path: "./result.pdf",
       margin: { top: "100px", right: "50px", bottom: "100px", left: "50px" },
       printBackground: true,
       format: "A4",
     });
     await page.close();
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline; filename=result.pdf');
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=result.pdf");
     res.send(pdf);
-  } catch (err) {
-    console.dir(err);
-    res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
-quiltrosRouter.post("/users", async (req, res) => {
+quiltrosRouter.post("/users", async (req, res, next) => {
   try {
     const newUserJson = await req.body;
     const { uid } = newUserJson;
@@ -91,12 +81,12 @@ quiltrosRouter.post("/users", async (req, res) => {
     const user = new User({ ...newUserJson, joinedOn: new Date() });
     await user.save();
     return res.status(201).json(user);
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
-quiltrosRouter.patch("/users/:uid", async (req, res) => {
+quiltrosRouter.patch("/users/:uid", async (req, res, next) => {
   try {
     const { uid } = await req.params;
     const updatedUserJson = await req.body;
@@ -109,32 +99,35 @@ quiltrosRouter.patch("/users/:uid", async (req, res) => {
     Object.assign(existingUser, updatedUserJson);
     await existingUser.save();
     return res.status(201).json(existingUser);
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
 // subscribe user
-quiltrosRouter.patch("/users/:uid/quiltros/:quiltroId", async (req, res) => {
-  try {
-    const { uid, quiltroId } = req.params;
-    const user = await User.findOne({ uid });
-    if (!user) {
-      return res.status(400).send({ error: "Could not find user." });
+quiltrosRouter.patch(
+  "/users/:uid/quiltros/:quiltroId",
+  async (req, res, next) => {
+    try {
+      const { uid, quiltroId } = req.params;
+      const user = await User.findOne({ uid });
+      if (!user) {
+        return res.status(400).send({ error: "Could not find user." });
+      }
+      user.quiltroIds = !user.quiltroIds
+        ? [quiltroId]
+        : user.quiltroIds.slice().concat([quiltroId]);
+      await user.save();
+      return res.status(200).json(user);
+    } catch (error) {
+      return next(error);
     }
-    user.quiltroIds = !user.quiltroIds
-      ? [quiltroId]
-      : user.quiltroIds.slice().concat([quiltroId]);
-    await user.save();
-    return res.status(200).json(user);
-  } catch (err) {
-    return res.status(500).json(err);
   }
-});
+);
 
 quiltrosRouter.post(
   "/quiltros/:quiltroId/requested-items",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { quiltroId } = req.params;
       const quiltro = await Quiltro.findOne({ quiltroId });
@@ -150,22 +143,22 @@ quiltrosRouter.post(
         return newRequestedItem;
       });
       return res.status(201).json(newRequestedItems);
-    } catch (err) {
-      return res.status(500).json(err);
+    } catch (error) {
+      return next(error);
     }
   }
 );
 
-quiltrosRouter.get("/users", async (req, res) => {
+quiltrosRouter.get("/users", async (req, res, next) => {
   try {
     const users = await User.find();
     return res.json(users);
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
-quiltrosRouter.post("/quiltros", async (req, res) => {
+quiltrosRouter.post("/quiltros", async (req, res, next) => {
   try {
     const newQuiltroJson = await req.body;
     const { uid } = newQuiltroJson;
@@ -178,12 +171,12 @@ quiltrosRouter.post("/quiltros", async (req, res) => {
       : user.quiltroIds.slice().concat([newQuiltro.quiltroId]);
     await user.save();
     return res.status(201).json(newQuiltro);
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
-quiltrosRouter.get("/users/:uid/quiltros", async (req, res) => {
+quiltrosRouter.get("/users/:uid/quiltros", async (req, res, next) => {
   const { uid } = req.params;
   if (!uid) {
     return res.status(400).send();
@@ -197,21 +190,21 @@ quiltrosRouter.get("/users/:uid/quiltros", async (req, res) => {
     const { quiltroIds } = user;
     const quiltros = await Quiltro.find({ quiltroId: { $in: quiltroIds } });
     return res.json(quiltros.reverse());
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
-quiltrosRouter.get("/quiltros", async (req, res) => {
+quiltrosRouter.get("/quiltros", async (req, res, next) => {
   try {
     const quiltros = await Quiltro.find();
     return res.json(quiltros.reverse());
-  } catch (err) {
-    res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
-quiltrosRouter.get("/quiltros/:quiltroId", async (req, res) => {
+quiltrosRouter.get("/quiltros/:quiltroId", async (req, res, next) => {
   const { quiltroId } = req.params;
   if (!quiltroId) {
     return res.status(400).send();
@@ -224,8 +217,8 @@ quiltrosRouter.get("/quiltros/:quiltroId", async (req, res) => {
     const requestedItems = await RequestedItem.find({ quiltroId });
     quiltro.requestedItems = requestedItems;
     return res.json(quiltro);
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 

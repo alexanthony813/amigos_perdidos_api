@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import crypto from "crypto";
-import { s3 } from "../index.js";
+import { s3, bucketName } from "../index.js";
 
 dotenv.config();
 

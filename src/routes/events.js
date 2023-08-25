@@ -9,7 +9,7 @@ import { twilioClient, twilioPhoneNumber } from "../index.js";
 
 const eventsRouter = express.Router();
 
-eventsRouter.post("/twilio-webhook", async (req, res) => {
+eventsRouter.post("/twilio-webhook", async (req, res, next) => {
   try {
     const now = new Date();
     const newStatusEvent = new StatusEvent(newStatusEventJson);
@@ -18,32 +18,32 @@ eventsRouter.post("/twilio-webhook", async (req, res) => {
     };
     newStatusEvent.time = now;
     await newStatusEvent.save();
-    res.status(201).json({ newStatusEvent })
+    res.status(201).json({ newStatusEvent });
   } catch (error) {
-    res.status(500).json({ error });
+    return next(error);
   }
 });
 
-eventsRouter.get("/events", async (req, res) => {
+eventsRouter.get("/events", async (req, res, next) => {
   try {
     const statusEvents = await StatusEvent.find();
     return res.json(statusEvents.reverse());
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
-eventsRouter.get("/quiltros/:quiltroId/events", async (req, res) => {
+eventsRouter.get("/quiltros/:quiltroId/events", async (req, res, next) => {
   try {
     const { quiltroId } = req.params;
     const statusEvents = await StatusEvent.find({ quiltroId });
     return res.json(statusEvents.reverse());
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
-eventsRouter.post("/quiltros/:quiltroId/event", async (req, res) => {
+eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
   try {
     const { quiltroId } = req.params;
     const newStatusEventJson = await req.body;
@@ -80,8 +80,8 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res) => {
       twilioClient.messages
         .create({
           body,
-          from: `whatsapp:${twilioPhoneNumber}`,
-          to: `whatsapp:${phoneNumber}`,
+          from: `${twilioPhoneNumber}`,
+          to: `${phoneNumber}`,
         })
         .then((value) => {
           return res.status(201).json(newStatusEvent);
@@ -93,8 +93,8 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res) => {
     } else {
       return res.status(201).json(newStatusEvent);
     }
-  } catch (err) {
-    return res.status(500).json(err);
+  } catch (error) {
+    return next(error);
   }
 });
 
