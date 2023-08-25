@@ -1,9 +1,80 @@
 import express from "express";
 import { Quiltro, User, RequestedItem } from "../models/index.js";
+import PDFDocument from "pdfkit";
+import { s3, bucketName } from "../index.js";
+import fs from "fs";
+import path from "path";
+import puppeteer from "puppeteer";
+import QRCode from "qrcode";
 
 const quiltrosRouter = express.Router();
-quiltrosRouter.get("/testdeploy", async (req, res) => {
-  res.status(200).json({});
+const appUrl = "https://quiltro-44098.web.app";
+async function generateQRCodeDataUrl(qrData) {
+  try {
+    const qrDataURL = await QRCode.toDataURL(qrData);
+    return qrDataURL;
+  } catch (error) {
+    console.error("Error generating QR code:", error);
+    throw error;
+  }
+}
+
+quiltrosRouter.get("/quiltros/:quiltroId/flyer", async (req, res) => {
+  try {
+    const { quiltroId } = req.params;
+    const quiltro = await Quiltro.findOne({ quiltroId });
+    if (!quiltro) {
+      return res.status(404).send();
+    }
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    const currentDirectory = process.cwd();
+    const relativePath = "/routes/sample.html";
+
+    const html = fs.readFileSync(
+      path.join(currentDirectory, relativePath),
+      "utf-8"
+    );
+    await page.setContent(html, { waitUntil: "domcontentloaded" });
+    const qrDataURL = await generateQRCodeDataUrl(
+      `${appUrl}/${quiltro.quiltroId}`
+    );
+    await page.evaluate(
+      ({ quiltro, qrDataURL }) => {
+        document.getElementById(
+          "quiltroName"
+        ).innerHTML = `¡Hola! Soy ${quiltro.name}`;
+        const imgElement = document.querySelector("#profileImage");
+        if (imgElement) {
+          imgElement.src = quiltro.photoUrl;
+        }
+        const qrcodeContainer = document.querySelector("#qrcode-container");
+        const qrImage = document.createElement("img");
+        qrImage.src = qrDataURL;
+        qrImage.height = 300;
+        qrImage.width = 300;
+        qrcodeContainer.appendChild(qrImage);
+      },
+      { quiltro, qrDataURL }
+    );
+
+    await page.waitForSelector(`[src="${quiltro.photoUrl}"]`);
+    await page.waitForTimeout(5000); // this is so annoying but no clean wait for image loaded
+    const pdf = await page.pdf({
+      path: "./result.pdf",
+      margin: { top: "100px", right: "50px", bottom: "100px", left: "50px" },
+      printBackground: true,
+      format: "A4",
+    });
+    await page.close();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename=result.pdf');
+    res.send(pdf);
+  } catch (err) {
+    console.dir(err);
+    res.status(500).json(err);
+  }
 });
 
 quiltrosRouter.post("/users", async (req, res) => {

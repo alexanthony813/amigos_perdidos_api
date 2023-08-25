@@ -9,6 +9,21 @@ import { twilioClient, twilioPhoneNumber } from "../index.js";
 
 const eventsRouter = express.Router();
 
+eventsRouter.post("/twilio-webhook", async (req, res) => {
+  try {
+    const now = new Date();
+    const newStatusEvent = new StatusEvent(newStatusEventJson);
+    newStatusEvent.details = {
+      body: "Logged event from twilio webhook",
+    };
+    newStatusEvent.time = now;
+    await newStatusEvent.save();
+    res.status(201).json({ newStatusEvent })
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
 eventsRouter.get("/events", async (req, res) => {
   try {
     const statusEvents = await StatusEvent.find();
