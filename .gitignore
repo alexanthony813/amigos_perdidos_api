@@ -4,3 +4,4 @@ node_modules
 .firebase
 src/firebase-debug.log
 src/result.pdf
+.cache
