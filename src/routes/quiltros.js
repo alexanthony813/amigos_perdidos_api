@@ -1,7 +1,5 @@
 import express from "express";
 import { Quiltro, User, RequestedItem } from "../models/index.js";
-import PDFDocument from "pdfkit";
-import { s3, bucketName } from "../index.js";
 import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
@@ -68,12 +66,12 @@ quiltrosRouter.get("/quiltros/:quiltroId/flyer", async (req, res) => {
       format: "A4",
     });
     await page.close();
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline; filename=result.pdf');
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=result.pdf");
     res.send(pdf);
   } catch (err) {
     console.dir(err);
-    res.status(500).json(err);
+    res.status(500).json({ err });
   }
 });
 
