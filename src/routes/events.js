@@ -80,8 +80,8 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res) => {
       twilioClient.messages
         .create({
           body,
-          from: `whatsapp:${twilioPhoneNumber}`,
-          to: `whatsapp:${phoneNumber}`,
+          from: `${twilioPhoneNumber}`,
+          to: `${phoneNumber}`,
         })
         .then((value) => {
           return res.status(201).json(newStatusEvent);
