@@ -20,15 +20,20 @@ export const userSchema = new Schema({
   tenantId: String,
   providerData: Object,
   metadata: Object,
-  isAnonymous: Boolean, // will determine whether can...?
+  isAnonymous: Boolean,
   isAdmin: Boolean,
   lastLoginAt: String,
   quiltroIds: Object,
+  adoptionInquiryIds: Object,
 });
 
 export const User = model("User", userSchema);
 
-export const statusEventStatuses = ["problem_denied", "problem_reported"];
+export const statusEventStatuses = [
+  "problem_denied",
+  "problem_reported",
+  "adoption_inquiry",
+];
 
 const statusEventSchema = new Schema({
   quiltroId: String,
@@ -52,7 +57,6 @@ const quiltroSchema = new Schema({
   photoUrl: String,
   lastReportedProblem: Object,
   isAdoptable: Boolean,
-  // requestedItems: Object, might come back
   // health_issues: '',
   // chip_id: '',
   // noseprint_id: '',

@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
 import QRCode from "qrcode";
+import { subscribeUserToQuiltro } from "../utils/index.js";
 
 const quiltrosRouter = express.Router();
 const appUrl = "https://quiltro-44098.web.app";
@@ -114,10 +115,7 @@ quiltrosRouter.patch(
       if (!user) {
         return res.status(400).send({ error: "Could not find user." });
       }
-      user.quiltroIds = !user.quiltroIds
-        ? [quiltroId]
-        : user.quiltroIds.slice().concat([quiltroId]);
-      await user.save();
+      await subscribeUserToQuiltro(user, quiltroId);
       return res.status(200).json(user);
     } catch (error) {
       return next(error);
@@ -166,10 +164,7 @@ quiltrosRouter.post("/quiltros", async (req, res, next) => {
     newQuiltro.quiltroId = newQuiltro._id.toString();
     await newQuiltro.save();
     const user = await User.findOne({ uid });
-    user.quiltroIds = !user.quiltroIds // TODO LET's USE POSTGRES THIS IS TOO MUCH, need join table
-      ? [newQuiltro.quiltroId]
-      : user.quiltroIds.slice().concat([newQuiltro.quiltroId]);
-    await user.save();
+    await subscribeUserToQuiltro(user, newQuiltro.quiltroId);
     return res.status(201).json(newQuiltro);
   } catch (error) {
     return next(error);
