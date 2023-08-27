@@ -6,6 +6,10 @@ import {
 } from "../models/index.js";
 import express from "express";
 import { twilioClient, twilioPhoneNumber } from "../index.js";
+import {
+  subscribeUserToQuiltro,
+  recordUserAdoptionInquiry,
+} from "../utils/index.js";
 
 const eventsRouter = express.Router();
 
@@ -62,6 +66,7 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
     if (!quiltro) {
       return res.status(404).send("quiltro not found");
     }
+
     const now = new Date();
     newStatusEventJson.time = now;
     const newStatusEvent = new StatusEvent(newStatusEventJson);
@@ -71,12 +76,25 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
     }
     quiltro.lastUpdatedAt = now;
     await quiltro.save();
-    const body = `Se informó un problema con ${quiltro.name}! \n Foto aquí: ${newStatusEvent.photoUrl} \n Mensaje del denunciante:${newStatusEvent.details.body}`;
-    const { uid } = quiltro;
-    const user = await User.findOne({ uid });
-    const { phoneNumber } = user;
 
-    if (newStatusEvent.status === "problem_reported") {
+    const { uid } = quiltro;
+    const adminUser = await User.findOne({ uid });
+    const { phoneNumber } = adminUser;
+    if (newStatusEvent.status === "adoption_inquiry") {
+      const reportingUid = newStatusEvent.details.from;
+      const reportingUser = await User.findOne({ uid: reportingUid });
+      await subscribeUserToQuiltro(reportingUser, quiltroId);
+      await recordUserAdoptionInquiry(reportingUser, quiltroId);
+    }
+
+    if (
+      newStatusEvent.status === "problem_reported" ||
+      newStatusEvent.status === "adoption_inquiry"
+    ) {
+      const body =
+        newStatusEvent.status === "problem_reported"
+          ? `Se informó un problema con ${quiltro.name}! \n Foto aquí: ${newStatusEvent.photoUrl} \n Mensaje del denunciante: ${newStatusEvent.details.body}`
+          : newStatusEvent.details.body;
       twilioClient.messages
         .create({
           body,
