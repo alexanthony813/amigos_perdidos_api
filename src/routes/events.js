@@ -3,6 +3,7 @@ import {
   Quiltro,
   User,
   statusEventStatuses,
+  AnalyticsEvent
 } from "../models/index.js";
 import express from "express";
 import { twilioClient, twilioPhoneNumber } from "../index.js";
@@ -23,6 +24,20 @@ eventsRouter.post("/twilio-webhook", async (req, res, next) => {
     newStatusEvent.time = now;
     await newStatusEvent.save();
     res.status(201).json({ newStatusEvent });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// expo-firebase-analytics is increasing bundle size too much, not worth it just want to track events. 
+eventsRouter.post("/analytics", async (req, res, next) => {
+  try {
+    const newAnalyticsJson = await req.body;
+    const now = new Date();
+    newAnalyticsJson.time = now;
+    const newAnalyticsEvent = new AnalyticsEvent(newAnalyticsJson);
+    await newAnalyticsEvent.save();
+    return res.status(201).json(newAnalyticsEvent);
   } catch (error) {
     return next(error);
   }
