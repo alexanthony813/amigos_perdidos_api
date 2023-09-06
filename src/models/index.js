@@ -45,6 +45,14 @@ const statusEventSchema = new Schema({
 
 export const StatusEvent = model("StatusEvent", statusEventSchema);
 
+const analyticsEventSchema = new Schema({
+  time: Date,
+  status: String,
+  details: Object,
+});
+
+export const AnalyticsEvent = model("AnalyticsEvent", analyticsEventSchema);
+
 const quiltroSchema = new Schema({
   quiltroId: String,
   uid: Object, // effectively this will be the reporter and the "admin", no admin mode..if you report it and register you will have to auth and then you are the admin for this quiltro
