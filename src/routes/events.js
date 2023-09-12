@@ -110,19 +110,29 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
         newStatusEvent.status === "problem_reported"
           ? `Se informó un problema con ${quiltro.name}! \n Foto aquí: ${newStatusEvent.photoUrl} \n Mensaje del denunciante: ${newStatusEvent.details.body}`
           : newStatusEvent.details.body;
-      twilioClient.messages
+      const twilioResult = await twilioClient.messages
         .create({
           body,
           from: `${twilioPhoneNumber}`,
           to: `${phoneNumber}`,
         })
-        .then((value) => {
-          return res.status(201).json(newStatusEvent);
-        })
-        .catch((error) => {
-          console.error(error);
-          return res.status(500).json(error);
+
+      if (twilioResult.errorCode) { // don't block response, log error
+        const now = new Date();
+        const newAnalyticsEvent = new AnalyticsEvent({
+          time: now,
+          status: 'twilio_text',
+          details: {
+            twilioResult,
+            adminUser,
+            quiltro,
+            newStatusEvent
+          }
         });
+        await newAnalyticsEvent.save();
+      }
+      
+      return res.status(201).json(newStatusEvent);
     } else {
       return res.status(201).json(newStatusEvent);
     }
