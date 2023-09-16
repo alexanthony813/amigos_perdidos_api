@@ -72,6 +72,7 @@ quiltrosRouter.post("/users", async (req, res, next) => {
   try {
     const newUserJson = await req.body;
     const { uid } = newUserJson;
+    // TODO clean up duck typing here, requires front end work
     newUserJson.isAdmin =
       !newUserJson.isAnonymous && newUserJson.phoneNumber ? true : false;
     const existingUser = await User.findOne({ uid });
