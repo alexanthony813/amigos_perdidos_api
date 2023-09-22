@@ -3,7 +3,7 @@ import {
   Quiltro,
   User,
   statusEventStatuses,
-  AnalyticsEvent
+  AnalyticsEvent,
 } from "../models/index.js";
 import express from "express";
 import { twilioClient, twilioPhoneNumber } from "../index.js";
@@ -29,7 +29,7 @@ eventsRouter.post("/twilio-webhook", async (req, res, next) => {
   }
 });
 
-// expo-firebase-analytics is increasing bundle size too much, not worth it just want to track events. 
+// expo-firebase-analytics is increasing bundle size too much, not worth it just want to track events.
 eventsRouter.post("/analytics", async (req, res, next) => {
   try {
     const newAnalyticsJson = await req.body;
@@ -93,7 +93,7 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
     await quiltro.save();
 
     const { uid } = quiltro;
-    const adminUser = await User.findOne({ uid });
+    const adminUser = await User.findOne({ uid }); // TODO MOVE TO HELPER FUNCTION
     const { phoneNumber } = adminUser;
     if (newStatusEvent.status === "adoption_inquiry") {
       const reportingUid = newStatusEvent.details.from;
@@ -106,32 +106,33 @@ eventsRouter.post("/quiltros/:quiltroId/event", async (req, res, next) => {
       newStatusEvent.status === "problem_reported" ||
       newStatusEvent.status === "adoption_inquiry"
     ) {
-      const body =
-        newStatusEvent.status === "problem_reported"
-          ? `Se informó un problema con ${quiltro.name}! \n Foto aquí: ${newStatusEvent.photoUrl} \n Mensaje del denunciante: ${newStatusEvent.details.body}`
-          : newStatusEvent.details.body;
-      const twilioResult = await twilioClient.messages
-        .create({
+      // TODO BREAK INTO HELPER FUNCTION
+      try {
+        const body =
+          newStatusEvent.status === "problem_reported"
+            ? `Se informó un problema con ${quiltro.name}! \n Foto aquí: ${newStatusEvent.photoUrl} \n Mensaje del denunciante: ${newStatusEvent.details.body}`
+            : newStatusEvent.details.body;
+
+        await twilioClient.messages.create({
           body,
           from: `${twilioPhoneNumber}`,
           to: `${phoneNumber}`,
-        })
-
-      if (twilioResult.errorCode) { // don't block response, log error
+        });
+      } catch (error) {
+        // don't block response, log error
         const now = new Date();
         const newAnalyticsEvent = new AnalyticsEvent({
           time: now,
-          status: 'twilio_text',
+          status: "twilio_text",
           details: {
-            twilioResult,
+            error,
             adminUser,
             quiltro,
-            newStatusEvent
-          }
+            newStatusEvent,
+          },
         });
         await newAnalyticsEvent.save();
       }
-      
       return res.status(201).json(newStatusEvent);
     } else {
       return res.status(201).json(newStatusEvent);
